@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "335658113415",
+    "project_id": "owias-telecom",
+    "storage_bucket": "owias-telecom.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:335658113415:android:8b1be075434698172fdb22",
+        "android_client_info": {
+          "package_name": "com.onemegasoft.owaistelecom"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC2n1rQqJAQNhhVIyMqUq6VUiiGo1Uckas"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:335658113415:android:80bd4e35be697b3f2fdb22",
+        "android_client_info": {
+          "package_name": "com.owaistelecom.telecom"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC2n1rQqJAQNhhVIyMqUq6VUiiGo1Uckas"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

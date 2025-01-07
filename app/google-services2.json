@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "705178919999",
+    "project_id": "owais-b9ac0",
+    "storage_bucket": "owais-b9ac0.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:705178919999:android:e9022ee634e5dc7387048a",
+        "android_client_info": {
+          "package_name": "com.owaistelecom.telecom"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAttS0H1vX4obCtBcoYx-J5z7EA5SN3fJo"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
