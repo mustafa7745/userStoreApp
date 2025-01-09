@@ -101,6 +101,9 @@ fun MainCompose1(
             stateController.isErrorAUD.value = false
             stateController.errorAUD.value = ""
         }
+        if (stateController.isShowMessage.value) {
+            Toast.makeText(activity, stateController.message.value, Toast.LENGTH_SHORT).show()
+        }
         if (stateController.isSuccessRead.value) {
             verticalArrangement = Arrangement.Top
             if (stateController.isHaveSuccessAudMessage()){

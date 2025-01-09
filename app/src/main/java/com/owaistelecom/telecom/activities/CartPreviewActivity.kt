@@ -3,7 +3,6 @@ package com.owaistelecom.telecom.activities
 import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
-import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
@@ -87,10 +86,22 @@ class CartPreviewActivity : ComponentActivity() {
 
 
     val list = listOf<PaymentModel>(
-        PaymentModel("عند التوصيل", R.drawable.ondelivery, 1),
+        PaymentModel("عند التوصيل", R.drawable.ondelivery, 0),
 //        PaymentModel("من المحفظة", R.drawable.wallet, 2),
-        PaymentModel("دفع الكتروني", R.drawable.epay, 3)
+        PaymentModel("دفع الكتروني", R.drawable.epay, 1)
     )
+
+    val radioOptions = listOf(
+        DeliveryOption(1,"التوصيل للموقع"),
+        DeliveryOption(2,"الاستلام من المتجر")
+    )
+
+
+    var selectedOption by mutableStateOf(radioOptions[0])
+
+    fun onOptionSelected(newOption: DeliveryOption) {
+        selectedOption = newOption
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -260,15 +271,23 @@ class CartPreviewActivity : ComponentActivity() {
     @Composable
     private fun MainContentOrderPreview() {
 
-        val radioOptions = listOf(
-            DeliveryOption(1,"التوصيل للموقع"),
-            DeliveryOption(2,"الاستلام من المتجر")
-        )
-        val (selectedOption, onOptionSelected) = remember { mutableStateOf(radioOptions[0]) }
+
         Button(
             modifier = Modifier.fillMaxWidth().padding(8.dp),
             onClick = {
-confirmOrder()
+                if (selectedOption.id == 1){
+                    if (selectedLocation != null){
+
+                        checkPaymentAndConfirm()
+
+                    }else {
+                        ShowLocations()
+                        stateController.showMessage("يجب تحديد موقع للتوصيل")
+                    }
+                }else{
+                    checkPaymentAndConfirm()
+                }
+
             }) {
             Text("تأكيد الطلب")
         }
@@ -286,7 +305,13 @@ confirmOrder()
                                         Modifier.fillMaxWidth().height(56.dp)
                                             .selectable(
                                                 selected = (text == selectedOption),
-                                                onClick = { onOptionSelected(text) },
+                                                onClick = {
+                                                    if (selectedOption.id == 2 ){
+                                                        selectedLocation = null
+                                                    }
+                                                    onOptionSelected(text)
+
+                                                          },
                                                 role = Role.RadioButton
                                             ).padding(horizontal = 16.dp),
                                         verticalAlignment = Alignment.CenterVertically
@@ -311,12 +336,7 @@ confirmOrder()
                             Button(
                                 modifier = Modifier.fillMaxWidth().padding(8.dp),
                                 onClick = {
-
-                                    if (locations.isEmpty()) {
-                                        readLocation()
-                                    }else{
-                                        isShowReadLocations = true
-                                    }
+                                    ShowLocations()
                                 }) {
                                 Text(if (selectedLocation == null)"اختيار موقع" else "تغيير الموقع")
                             }
@@ -388,6 +408,24 @@ confirmOrder()
                         }
                     }
                 })
+    }
+
+    private fun checkPaymentAndConfirm() {
+        if (selectedPaymentMethod != null) {
+            confirmOrder()
+        } else {
+            isShowSelectPaymentMethod = true
+            stateController.showMessage("يجب تحديد طريقة الدفع")
+        }
+    }
+
+
+    private fun ShowLocations() {
+        if (locations.isEmpty()) {
+            readLocation()
+        } else {
+            isShowReadLocations = true
+        }
     }
 
     @OptIn(ExperimentalMaterial3Api::class)
@@ -490,23 +528,34 @@ confirmOrder()
     fun confirmOrder() {
         stateController.startAud()
 
-        val body = builderForm3()
+
+        val bodyBuilder = builderForm3()
             .addFormDataPart("orderProducts", MyJson.MyJson.encodeToJsonElement(SingletonCart.getProductsIdsWithQnt()).toString())
-            .addFormDataPart("storeId",SingletonStores.selectedStore.id.toString())
-            .build()
+            .addFormDataPart("storeId", SingletonStores.selectedStore.id.toString())
+
+        if (selectedLocation != null) {
+            bodyBuilder.addFormDataPart("locationId", selectedLocation!!.id.toString())
+        }
+        if (selectedPaymentMethod != null){
+            bodyBuilder.addFormDataPart("paid", selectedPaymentMethod!!.id.toString())
+        }
+
+        val body = bodyBuilder.build()
+
 
         requestServer.request2(body, "confirmOrder", { code, fail ->
             stateController.errorStateAUD(fail)
         }
         ) { data ->
-            val result: List<Location> =
-                MyJson.IgnoreUnknownKeys.decodeFromString(
-                    data
-                )
+//            val result: List<Location> =
+//                MyJson.IgnoreUnknownKeys.decodeFromString(
+//                    data
+//                )
 
 //            locations= result
 ////            SelectedStore.store.value!! .latLng = latiLng
 //            MyToast(this,"تم بنجاح")
+            stateController.showMessage("تم ارسال الطلب بنجاح")
             finish()
 
 //            stateController.successStateAUD()
@@ -543,11 +592,14 @@ confirmOrder()
                             Modifier
                                 .padding(8.dp)
                                 .clickable {
-                                    if (item.id == 3) {
-//                                        intentFunWhatsapp()
-                                    } else
-                                        selectedPaymentMethod = item
+                                    selectedPaymentMethod = item
                                     isShowSelectPaymentMethod = false
+
+//                                    if (item.id == 3) {
+////                                        intentFunWhatsapp()
+//                                    } else
+//                                        selectedPaymentMethod = item
+//                                    isShowSelectPaymentMethod = false
                                 },
                             colors = CardColors(
                                 containerColor = Color.White,

@@ -659,12 +659,15 @@ class InsideStoreActivity : ComponentActivity() {
                                 horizontalArrangement = Arrangement.SpaceBetween,
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
-                                Text(
-                                    product.product.productName,
-                                    Modifier.padding(8.dp),
-                                    fontWeight = FontWeight.Bold,
-                                    fontSize = 16.sp
-                                )
+                                Column {
+                                    Text(
+                                        product.product.productName,
+                                        Modifier.padding(8.dp),
+                                        fontWeight = FontWeight.Bold,
+                                        fontSize = 16.sp
+                                    )
+                                }
+
                                 if (product.product.images.firstOrNull() != null)
                                     CustomImageView(
                                         modifier = Modifier

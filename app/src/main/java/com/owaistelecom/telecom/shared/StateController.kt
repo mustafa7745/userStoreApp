@@ -1,11 +1,16 @@
 package com.owaistelecom.telecom.shared
 
 import androidx.compose.runtime.mutableStateOf
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 class StateController {
     val isLoadingRead = mutableStateOf(false)
     val isSuccessRead = mutableStateOf(false)
     val isErrorRead = mutableStateOf(false)
+    val isShowMessage = mutableStateOf(false)
+    val message = mutableStateOf("")
     val errorRead = mutableStateOf("")
     //
     val isLoadingAUD = mutableStateOf(false)
@@ -55,5 +60,19 @@ class StateController {
         val message = successAUD.value;
         successAUD.value = ""
         return message
+    }
+
+    fun showMessage(m: String){
+
+        GlobalScope.launch {
+            isShowMessage.value = true
+            message.value = m
+            delay(500)
+            isShowMessage.value = false
+            message.value = ""
+
+        }
+
+//        message.value = ""
     }
 }

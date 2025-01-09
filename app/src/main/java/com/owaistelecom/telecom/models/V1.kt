@@ -42,6 +42,15 @@ data class Home(
 )
 
 @Serializable
+data class Currency(
+    var id: Int,
+    var name:String,
+    var sign:String
+)
+
+
+
+@Serializable
 data class StoreConfig(
     val categories: List<Int>,
     val sections: List<Int>,
@@ -53,32 +62,5 @@ data class StoreConfig(
 
 
 
-@Serializable
-data class StoreCategory1(
-    val id:Int,
-    val name: String,
-    val storeId:Int
-)
 
-@Serializable
-data class StoreCategorySection(
-    val id: Int,
-    val sectionName: String,
-    val sectionId: Int,
-    val storeCategoryId: Int,
-)
 
-@Serializable
-data class Scp(
-    val id: Int,
-    val name: String,
-    val storeCategorySectionId:Int,
-    val category3Id: Int
-)
-
-@Serializable
-data class Home34(
-    val storeCategories: List<StoreCategory1>,
-    val storeCategoriesSections:List<StoreCategorySection>,
-    val csps:List<Scp>
-)

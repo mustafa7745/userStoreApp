@@ -396,7 +396,7 @@ class AddToCartActivity : ComponentActivity() {
                                         disabledContentColor = Color.Cyan
                                     )
                                 ) {
-                                    Log.e("uurr", SingletonRemoteConfig.remoteConfig.BASE_IMAGE_URL+storeProduct.product.images[i].image)
+//                                    Log.e("uurr", SingletonRemoteConfig.remoteConfig.BASE_IMAGE_URL+storeProduct.product.images[i].image)
                                     CustomImageView(
                                         modifier = Modifier
                                             .fillMaxWidth(),
@@ -469,7 +469,7 @@ class AddToCartActivity : ComponentActivity() {
                                     Text(option.name)
                                     Text(
                                         modifier = Modifier.padding(8.dp),
-                                        text = formatPrice(option.price) + " ريال ",
+                                        text = formatPrice(option.price) +" "+ option.currency.name,
                                         fontWeight = FontWeight.Bold,
                                         color = MaterialTheme.colorScheme.primary
                                     )

@@ -20,6 +20,7 @@ data class StoreProduct(
 @Serializable
 data class ProductOption(
     val storeProductId: Int,
+    val currency: Currency,
     val name: String,
     val price: String
 )
@@ -69,5 +70,8 @@ data class ErrorMessage(
 @Serializable
 data class AccessToken(
     val token: String,
+    val firstName: String,
+    val lastName: String,
+    val logo: String?,
     val expireAt:String
 )
