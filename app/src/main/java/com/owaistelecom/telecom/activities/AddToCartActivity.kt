@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -17,10 +18,13 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardColors
 import androidx.compose.material3.HorizontalDivider
@@ -56,6 +60,9 @@ import com.owaistelecom.telecom.models.Product
 import com.owaistelecom.telecom.models.ProductOption
 import com.owaistelecom.telecom.models.Store
 import com.owaistelecom.telecom.models.StoreProduct
+import com.owaistelecom.telecom.shared.CustomCard
+import com.owaistelecom.telecom.shared.CustomIcon
+import com.owaistelecom.telecom.shared.CustomRow2
 import com.owaistelecom.telecom.ui.theme.OwaisTelecomTheme
 import kotlinx.serialization.Serializable
 
@@ -273,18 +280,30 @@ object SingletonCart {
         }
      return  emptyList<CartProduct>()
     }
-    fun getAllCartProductsSum(store: Store): Double {
+    fun getAllCartProductsSum(store: Store): String {
+        val list = arrayListOf<OrderAmount>()
         var sum = 0.0
         val existingStoreCartProduct = storeCartProducts.find { it.store == store }
         if (existingStoreCartProduct != null){
             existingStoreCartProduct. cartProducts.value.forEach { cartProduct: CartProduct ->
                 cartProduct.cartProductOption.forEach { productOption ->
-                    sum += productOption.productOption.price.toDouble() * productOption.count.value.toDouble()
+                    if (list.find { it.id == productOption.productOption.currency.id } != null){
+                        list.find { it.id == productOption.productOption.currency.id }!!.amount += productOption.productOption.price.toDouble() * productOption.count.value.toDouble()
+                    }
+                    else{
+                        list.add(
+                            OrderAmount(productOption.productOption.currency.id,productOption.productOption.currency.name,productOption.productOption.price.toDouble() * productOption.count.value.toDouble()))
+
+                    }
+//                    sum += productOption.productOption.price.toDouble() * productOption.count.value.toDouble()
                 }
             }
-            return  sum
+
         }
-        return  sum
+        val f = list.joinToString(
+            separator = " و "
+        ) {  formatPrice(it.amount.toString()) +" "+ it.currencyName }
+        return f
     }
 
     fun getProductsIdsWithQnt():List<OrderProductWithQntModel>{
@@ -300,6 +319,8 @@ object SingletonCart {
         return list
     }
 
+
+
     // Clear the cart
 //    fun clearCart() {
 //        cartProducts = listOf()
@@ -310,6 +331,7 @@ data class OrderProductWithQntModel (
     val id: Int,
     val qnt: Int,
 )
+
 
 class AddToCartActivity : ComponentActivity() {
     lateinit var storeProduct: StoreProduct
@@ -335,9 +357,20 @@ class AddToCartActivity : ComponentActivity() {
 
 
 
+        enableEdgeToEdge()
         setContent {
             OwaisTelecomTheme {
-                MainContent()
+                Column (Modifier.safeDrawingPadding()){
+                    CustomCard(modifierBox = Modifier){
+                        CustomRow2{
+                            CustomIcon(Icons.AutoMirrored.Default.ArrowBack, border = true) {
+                                finish()
+                            }
+                            Text(storeProduct.product.productName)
+                        }
+                    }
+                    MainContent()
+                }
             }
         }
     }
@@ -389,12 +422,12 @@ class AddToCartActivity : ComponentActivity() {
                                             )
                                         )
                                         .padding(5.dp),
-                                    colors = CardColors(
-                                        containerColor = Color.White,
-                                        contentColor = Color.Black,
-                                        disabledContainerColor = Color.Blue,
-                                        disabledContentColor = Color.Cyan
-                                    )
+//                                    colors = CardColors(
+//                                        containerColor = Color.White,
+//                                        contentColor = Color.Black,
+//                                        disabledContainerColor = Color.Blue,
+//                                        disabledContentColor = Color.Cyan
+//                                    )
                                 ) {
 //                                    Log.e("uurr", SingletonRemoteConfig.remoteConfig.BASE_IMAGE_URL+storeProduct.product.images[i].image)
                                     CustomImageView(
@@ -427,17 +460,17 @@ class AddToCartActivity : ComponentActivity() {
                                 fontSize = 18.sp,
                                 color = Color.Black
                             )
-                            if(SingletonCart.ifProductInCart(
-                                    SingletonStores.selectedStore,
-                                    storeProduct.product
-                                )
-                            )
-                            IconRemove {
-                                SingletonCart.removeProductFromCart(
-                                    SingletonStores.selectedStore,
-                                    storeProduct.product
-                                )
-                            }
+//                            if(SingletonCart.ifProductInCart(
+//                                    SingletonStores.selectedStore,
+//                                    storeProduct.product
+//                                )
+//                            )
+//                            IconRemove {
+//                                SingletonCart.removeProductFromCart(
+//                                    SingletonStores.selectedStore,
+//                                    storeProduct.product
+//                                )
+//                            }
 
                         }
                     }

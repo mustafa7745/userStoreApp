@@ -20,6 +20,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -30,6 +31,7 @@ import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CardElevation
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -155,7 +157,7 @@ fun MainCompose2(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(top = padding).background(Color.White),
+            .padding(top = padding),
         verticalArrangement = Arrangement.Top,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
@@ -179,7 +181,8 @@ fun CustomImageView1(
     imageUrl: String,
     modifier: Modifier = Modifier,
     contentDescription: String? = null,
-    contentScale: ContentScale = ContentScale.Crop
+    contentScale: ContentScale = ContentScale.Crop,
+    isLoading:Boolean = true
 ) {
     // Create ImageLoader with OkHttpClient
 //    val imageLoader = ImageLoader.Builder(context)
@@ -205,6 +208,7 @@ fun CustomImageView1(
 
         },
         loading = {
+            if (isLoading)
             CircularProgressIndicator()
         },
         model = imageUrl,
@@ -260,8 +264,7 @@ fun CustomImageView(
 }
 @Composable
 fun CustomImageViewUri(
-    context: Context,
-    imageUrl: Uri,
+    imageUrl: Any,
     modifier: Modifier = Modifier,
     contentDescription: String? = null
 ) {
@@ -306,38 +309,34 @@ fun getRemoteConfig(): FirebaseRemoteConfig {
     remoteConfig.setConfigSettingsAsync(configSettings)
     return remoteConfig;
 }
+private fun sharedBuilderForm(): MultipartBody.Builder {
+    val appInfoMethod = AppInfoMethod()
+    return MultipartBody.Builder()
+        .setType(MultipartBody.FORM)
+//        .addFormDataPart("sha", appInfoMethod.getAppSha())
+        .addFormDataPart("sha", "11:AA:07:80:6F:35:8B:F1:03:44:F9:5F:4F:89:02:5E:F2:9B:4C:65:AE:9F:88:B6:42:AE:64:84:C8:A6:3C:0C")
+        .addFormDataPart("packageName", appInfoMethod.getAppPackageName())
+        .addFormDataPart("deviceId", appInfoMethod.getDeviceId().toString())
+}
 
 
 fun builderForm(token:String): MultipartBody.Builder {
-    val appInfoMethod = AppInfoMethod()
-    return MultipartBody.Builder()
-        .setType(MultipartBody.FORM)
-        .addFormDataPart("sha", appInfoMethod.getAppSha())
+    return sharedBuilderForm()
         .addFormDataPart("appToken", token)
-        .addFormDataPart("packageName", appInfoMethod.getAppPackageName())
-        .addFormDataPart("deviceId", appInfoMethod.getDeviceId().toString())
         .addFormDataPart("model", Build.MODEL)
         .addFormDataPart("version", Build.VERSION.RELEASE)
 }
+
+
 fun builderForm2(): MultipartBody.Builder {
-    val appInfoMethod = AppInfoMethod()
-    return MultipartBody.Builder()
-        .setType(MultipartBody.FORM)
-        .addFormDataPart("sha", appInfoMethod.getAppSha())
-        .addFormDataPart("packageName", appInfoMethod.getAppPackageName())
-        .addFormDataPart("deviceId", appInfoMethod.getDeviceId().toString())
+    return sharedBuilderForm()
         .addFormDataPart("model", Build.MODEL)
         .addFormDataPart("version", Build.VERSION.RELEASE)
 }
 
 fun builderForm3(): MultipartBody.Builder {
-    val appInfoMethod = AppInfoMethod()
-    return MultipartBody.Builder()
-        .setType(MultipartBody.FORM)
+    return sharedBuilderForm()
         .addFormDataPart("accessToken", AToken().getAccessToken().token)
-        .addFormDataPart("deviceId", appInfoMethod.getDeviceId().toString())
-        .addFormDataPart("sha", appInfoMethod.getAppSha())
-        .addFormDataPart("packageName", appInfoMethod.getAppPackageName())
 }
 
 fun getCurrentDate(): LocalDateTime {
@@ -352,6 +351,9 @@ RoundedCornerShape(12.dp)),
                modifierBox: Modifier ,
                content: @Composable() (() -> Unit)){
     Card(
+        elevation =  CardDefaults.cardElevation(
+            defaultElevation = 10.dp
+        ),
         colors  = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.surface
         ),
@@ -361,9 +363,9 @@ RoundedCornerShape(12.dp)),
             modifier = modifierBox
 
         ){
-            Column {
+//            Column {
                 content()
-            }
+//            }
 
         }
     }
@@ -514,10 +516,10 @@ fun ADControll(product: Product, option: ProductOption) {
             SingletonCart.decrement(SingletonStores.selectedStore, product, option)
         }
 
-        if (SingletonCart.ifOptionInCart(SingletonStores.selectedStore,product, option))
-        IconRemove {
-            SingletonCart.removeProductOptionFromCart(SingletonStores.selectedStore,product, option)
-        }
+//        if (SingletonCart.ifOptionInCart(SingletonStores.selectedStore,product, option))
+//        IconRemove {
+//            SingletonCart.removeProductOptionFromCart(SingletonStores.selectedStore,product, option)
+//        }
     }
 }
 @Composable
@@ -647,4 +649,23 @@ fun formatPrice(price: String): String {
                 )
             )
     )
+}
+@Composable
+fun CustomRow(content: @Composable() (RowScope.() -> Unit)){
+    Row  (Modifier.fillMaxWidth().padding(8.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.SpaceBetween
+    ){
+
+        content()
+    }
+}
+
+@Composable
+fun CustomRow2(content: @Composable() (RowScope.() -> Unit)){
+    Row  (Modifier.fillMaxWidth().padding(8.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ){
+        content()
+    }
 }

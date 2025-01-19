@@ -48,6 +48,14 @@ data class Currency(
     var sign:String
 )
 
+@Serializable
+data class ProductView(
+    var id: Int,
+    var name:String,
+    val products:List<StoreProduct>
+)
+
+
 
 
 @Serializable

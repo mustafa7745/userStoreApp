@@ -132,7 +132,7 @@ class RequestServer(private val activity: ComponentActivity) {
                             if (MyJson.isJson(data)) {
                                 val respone =
                                     MyJson.IgnoreUnknownKeys.decodeFromString<ErrorMessage>(data)
-                                if (respone.code == 1000){//refresh access token
+                                if (respone.code == 1000){ //refresh access token
                                     refreshToken{code, fail ->
                                         onFail(code,fail)
                                     }

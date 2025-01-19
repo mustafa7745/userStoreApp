@@ -40,8 +40,11 @@
         <activity android:name=".activities.AddToCartActivity"/>
         <activity android:name=".activities.CartPreviewActivity"/>
         <activity android:name=".activities.AddLocationActivity"/>
+        <activity android:name=".activities.OrdersActivity"/>
+        <activity android:name=".activities.SettingsActivity"/>
+        <activity android:name=".activities.SearchActivity"/>
 
-
+        <activity android:name=".activities.OrderProductsActivity"/>
         <service
             android:name=".MyFirebaseMessagingService"
             android:exported="false" >

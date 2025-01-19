@@ -10,10 +10,15 @@ import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.SideEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
 import androidx.core.view.WindowCompat
+import com.owaistelecom.telecom.storage.ThemeStorage
 
 private val DarkColorScheme = darkColorScheme(
     primary = Purple80,
@@ -24,7 +29,8 @@ private val DarkColorScheme = darkColorScheme(
 private val LightColorScheme = lightColorScheme(
     primary = Purple40,
     secondary = PurpleGrey40,
-    tertiary = Pink40
+    tertiary = Pink40,
+    surface = Color.White
 
     /* Other default colors to override
     background = Color(0xFFFFFBFE),
@@ -37,10 +43,11 @@ private val LightColorScheme = lightColorScheme(
     */
 )
 
+var darkTheme by mutableStateOf(ThemeStorage().isDarkMode())
+
 
 @Composable
 fun OwaisTelecomTheme(
-    darkTheme: Boolean = isSystemInDarkTheme(),
     // Dynamic color is available on Android 12+
     dynamicColor: Boolean = true,
     content: @Composable () -> Unit

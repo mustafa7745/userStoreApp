@@ -1,19 +1,12 @@
 package com.owaistelecom.telecom.activities
 
 import android.content.Intent
-import android.content.IntentSender
+import android.net.Uri
 import android.os.Bundle
-import android.text.Editable
-import android.text.TextWatcher
 import android.util.Log
-import android.view.ViewGroup
-import android.widget.EditText
-import android.widget.FrameLayout
-import android.widget.TextView
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.activity.result.IntentSenderRequest
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -23,29 +16,26 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.pager.HorizontalPager
-import androidx.compose.foundation.pager.PagerState
-import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Star
+import androidx.compose.material.icons.outlined.AddCircle
 import androidx.compose.material.icons.outlined.FavoriteBorder
 import androidx.compose.material.icons.outlined.Info
+import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material.icons.outlined.Star
-import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.DropdownMenu
@@ -68,23 +58,16 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.platform.LocalView
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.viewinterop.AndroidView
-import com.google.android.gms.common.api.ResolvableApiException
-import com.google.android.gms.location.LocationRequest
-import com.google.android.gms.location.LocationServices
-import com.google.android.gms.location.LocationSettingsRequest
-import com.google.android.gms.location.LocationSettingsResponse
-import com.google.android.gms.location.SettingsClient
-import com.google.android.gms.tasks.OnSuccessListener
-import com.google.android.gms.tasks.Task
+import coil.compose.AsyncImage
 import com.google.firebase.ktx.Firebase
 import com.google.firebase.messaging.ktx.messaging
+import com.owaistelecom.telecom.R
+import com.owaistelecom.telecom.models.AccessToken
 import com.owaistelecom.telecom.shared.MyJson
 import com.owaistelecom.telecom.shared.StateController
 import com.owaistelecom.telecom.storage.HomeStorage
@@ -98,22 +81,26 @@ import com.owaistelecom.telecom.shared.SingletonRemoteConfig
 import com.owaistelecom.telecom.shared.formatNumber
 import com.owaistelecom.telecom.shared.getCurrentDate
 import com.owaistelecom.telecom.models.Home
+import com.owaistelecom.telecom.models.ProductView
 import com.owaistelecom.telecom.models.Store
 import com.owaistelecom.telecom.models.StoreNestedSection
 import com.owaistelecom.telecom.models.StoreSection
 import com.owaistelecom.telecom.shared.AToken
+import com.owaistelecom.telecom.shared.CustomCard
 import com.owaistelecom.telecom.shared.CustomImageView1
+import com.owaistelecom.telecom.shared.CustomImageViewUri
 import com.owaistelecom.telecom.shared.SingletonStores
 import com.owaistelecom.telecom.shared.builderForm2
+import com.owaistelecom.telecom.storage.ThemeStorage
 import com.owaistelecom.telecom.ui.theme.OwaisTelecomTheme
-import kotlinx.coroutines.launch
+import com.owaistelecom.telecom.ui.theme.darkTheme
 import kotlinx.serialization.encodeToString
 import okhttp3.MultipartBody
 import java.time.Duration
 
 class InsideStoreActivity : ComponentActivity() {
     val homeStorage = HomeStorage();
-    private val products = mutableStateOf<List<StoreProduct>>(listOf())
+    private val productViews = mutableStateOf<List<ProductView>>(listOf())
     private val stores = mutableStateOf<List<Store>>(listOf())
     var home by mutableStateOf<Home?>(null)
     val stateController = StateController()
@@ -121,7 +108,7 @@ class InsideStoreActivity : ComponentActivity() {
     val requestServer = RequestServer(this)
 
     var currentPage by mutableStateOf(0)
-   private var store by mutableStateOf<Store?>(null)
+    private var store by mutableStateOf<Store?>(null)
 
 
     var selectedCategory = mutableStateOf<StoreCategory?>(null)
@@ -129,12 +116,31 @@ class InsideStoreActivity : ComponentActivity() {
     var selectedStoreNestedSection = mutableStateOf<StoreNestedSection?>(null)
     var isEmptyComponent by mutableStateOf(true)
 
+    val owaisMode = false
+
 
     val aToken = AToken()
+    lateinit var accesstoken:AccessToken
     val pageList = listOf(
        PageModel("متجر اويس تيليكوم", 0),
        PageModel("اخر العروض", 1),
     )
+
+    private var portraitPosts by mutableStateOf<List<Post>>(listOf(
+        Post("https://i.ytimg.com/vi/rMAol1wA5Zs/oar2.jpg","https://www.youtube.com/shorts/rMAol1wA5Zs"),
+        Post("https://i.ytimg.com/vi/VzJwvizuxu8/oar2.jpg","https://www.youtube.com/shorts/VzJwvizuxu8"),
+        Post("https://i.ytimg.com/vi/aOI8ZR_9GKs/oar2.jpg","https://www.youtube.com/shorts/t0E_D2rv3nY"),
+        Post("https://i.ytimg.com/vi/epDYVpbqKw0/oar2.jpg","https://www.youtube.com/shorts/epDYVpbqKw0"),
+        Post("https://i.ytimg.com/vi/Tr2PeP01R4s/oar2.jpg","https://www.youtube.com/shorts/Tr2PeP01R4s")
+    ))
+
+    private var unportraitPosts by mutableStateOf<List<Post>>(listOf(
+        Post("https://i.ytimg.com/vi/34aXhdIH1Hg/hq720.jpg","https://www.youtube.com/shorts/rMAol1wA5Zs"),
+        Post("https://i.ytimg.com/vi/CWR18v9SPqM/hq720.jpg","https://www.youtube.com/shorts/VzJwvizuxu8"),
+        Post("https://i.ytimg.com/vi/LOOxAiATU70/hq720.jpg","https://www.youtube.com/shorts/t0E_D2rv3nY"),
+        Post("https://i.ytimg.com/vi/2LogFbMb58w/hq720.jpg","https://www.youtube.com/shorts/epDYVpbqKw0"),
+        Post("https://i.ytimg.com/vi/bxm4J5OpK8A/hq720.jpg","https://www.youtube.com/shorts/Tr2PeP01R4s")
+    ))
 
 
 
@@ -148,9 +154,9 @@ class InsideStoreActivity : ComponentActivity() {
         if (!requestServer.serverConfig.isSetSubscribeApp()){
             subscribeToAppTopic()
         }
-
         if (!requestServer.serverConfig.isSetRemoteConfig()){
 
+            stateController.startRead()
             requestServer.initVarConfig({
                 stateController.errorStateRead("enable get remote config")
             }){
@@ -184,6 +190,16 @@ class InsideStoreActivity : ComponentActivity() {
 //
 //
 //                }
+                if (owaisMode)
+                    MainCompose1(
+                        10.dp, stateController, this@InsideStoreActivity,
+                        {  },
+                    ){
+                        OfferView()
+                    }
+
+                else
+
                 MyStore()
             }
         }
@@ -200,20 +216,97 @@ class InsideStoreActivity : ComponentActivity() {
 //        val bottomInset = insets.getBottom(density =LocalDensity.current.)
 
 
-        Box (Modifier.fillMaxSize().safeDrawingPadding()){
+        Box (Modifier.fillMaxSize()){
             MainCompose1(
                 10.dp, stateController, this@InsideStoreActivity,
                 { readStores() },
-            ) {
+            )
+            {
 //                HorizontalPager(
 //                    pagerState,
 //                    modifier = Modifier.fillMaxSize()
 //                ) { item ->
                     if (pageList.find { 0 == currentPage } != null) {
-                        LazyColumn(Modifier.background(Color.White).safeDrawingPadding()) {
-                            HeaderComponent(this)
-                            MyProducts(this)
+                        Column(Modifier.safeDrawingPadding().background(MaterialTheme.colorScheme.surface)) {
+                            Row (Modifier.fillMaxWidth().padding(8.dp),
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.SpaceBetween
+                            ) {
+                                Column (Modifier.width(80.dp).clickable {  },verticalArrangement = Arrangement.SpaceBetween, horizontalAlignment = Alignment.CenterHorizontally) {
+                                    CustomImageViewUri(modifier = Modifier.size(50.dp), imageUrl = R.drawable.homeicon,)
+                                    HorizontalDivider(Modifier.padding(8.dp))
+                                    Text("الرئيسية")
+                                }
+                                Column (Modifier.width(80.dp).clickable { gotoOrders() },verticalArrangement = Arrangement.SpaceBetween, horizontalAlignment = Alignment.CenterHorizontally) {
+                                    CustomImageViewUri(modifier = Modifier.size(50.dp), imageUrl = R.drawable.ordericon,)
+                                    HorizontalDivider(Modifier.padding(8.dp))
+                                    Text("طلباتي")
+                                }
+                                Column (Modifier.width(80.dp).clickable {  gotoSearch() },verticalArrangement = Arrangement.SpaceBetween, horizontalAlignment = Alignment.CenterHorizontally) {
+                                    CustomImageViewUri(modifier = Modifier.size(50.dp), imageUrl = R.drawable.seearchwithman,)
+                                    HorizontalDivider(Modifier.padding(8.dp))
+                                    Text("البحث")
+                                }
+                                Column (Modifier.width(80.dp).clickable { gotoSettings() },verticalArrangement = Arrangement.SpaceBetween, horizontalAlignment = Alignment.CenterHorizontally) {
+                                    CustomImageViewUri(modifier = Modifier.size(50.dp), imageUrl = R.drawable.settingicon,)
+                                    HorizontalDivider(Modifier.padding(8.dp))
+                                    Text("الاعدادات")
+                                }
+                            }
+
+                            LazyColumn {
+//                                item {
+//                                    CustomCard(modifierBox =  Modifier.fillMaxWidth().padding(8.dp)) {
+//                                        Row (Modifier.fillMaxSize()){
+////                                    if (accesstoken.logo!= null)
+//                                            CustomImageView1(
+//                                                modifier = Modifier
+//                                                    .border(
+//                                                        1.dp,
+//                                                        MaterialTheme.colorScheme.primary,
+//                                                        RoundedCornerShape(12.dp)
+//                                                    )
+//                                                    .size(50.dp)
+//                                                    .clickable {
+//
+//                                                    },
+//                                                imageUrl = SingletonRemoteConfig.remoteConfig.BASE_IMAGE_URL + SingletonRemoteConfig.remoteConfig.SUB_FOLDER_STORE_COVERS + "y",
+//                                            )
+//                                            Column(Modifier.padding(8.dp)) { Text( "مرحبا بك: "+"أمجد" + " " + "قايد") }
+
+//                                            if (darkTheme){
+//                                                CustomIcon(Icons.Outlined.AddCircle) {
+//                                                    ThemeStorage().setData(MyJson.IgnoreUnknownKeys.encodeToString(false))
+//                                                    darkTheme = false
+//                                                }
+//                                            }else{
+//                                                CustomIcon(Icons.Outlined.FavoriteBorder) {
+//                                                    ThemeStorage().setData(MyJson.IgnoreUnknownKeys.encodeToString(true))
+//                                                    darkTheme = true
+//                                                }
+//                                            }
+//                                        }
+//                                    }
+//
+//
+//
+////                                Box(Modifier.fillMaxWidth().padding(8.dp).clickable {  }) {
+////
+////                                }
+////
+////                                HorizontalDivider()
+//
+//
+//                                }
+
+
+
+//                            HeaderComponent(this)
+                                MyProducts(this)
+                            }
+
                         }
+
                     }
                     else {
 //                        Text("Moosmdkd")
@@ -222,30 +315,30 @@ class InsideStoreActivity : ComponentActivity() {
 
 //                }
             }
-            TabRow(currentPage,Modifier.align(Alignment.BottomCenter)) {
-                val coroutineScope = rememberCoroutineScope()
-                pageList.map { item ->
-                    Tab(
-                        modifier = Modifier.padding(3.dp),
-                        selected = item.pageId == currentPage,
-                        onClick = {
-                            currentPage = item.pageId
-//                            coroutineScope.launch {
-//                                pagerState.animateScrollToPage(item.pageId)
-//                            }
-                        },
-                        text = {
-                            Text(
-                                modifier = Modifier.padding(3.dp),
-                                textAlign = TextAlign.Start,
-                                text = item.pageName,
-                                fontSize = 14.sp,
-                                color = if (item.pageId == currentPage) MaterialTheme.colorScheme.primary else Color.Black
-                            )
-                        }
-                    )
-                }
-            }
+//            TabRow(currentPage,Modifier.align(Alignment.BottomCenter)) {
+//                val coroutineScope = rememberCoroutineScope()
+//                pageList.map { item ->
+//                    Tab(
+//                        modifier = Modifier.padding(3.dp),
+//                        selected = item.pageId == currentPage,
+//                        onClick = {
+//                            currentPage = item.pageId
+////                            coroutineScope.launch {
+////                                pagerState.animateScrollToPage(item.pageId)
+////                            }
+//                        },
+//                        text = {
+//                            Text(
+//                                modifier = Modifier.padding(3.dp),
+//                                textAlign = TextAlign.Start,
+//                                text = item.pageName,
+//                                fontSize = 14.sp,
+//                                color = if (item.pageId == currentPage) MaterialTheme.colorScheme.primary else Color.Black
+//                            )
+//                        }
+//                    )
+//                }
+//            }
         }
 
 
@@ -253,25 +346,67 @@ class InsideStoreActivity : ComponentActivity() {
 
     @Composable
     private fun OfferView() {
-//        Spacer()
-       LazyRow(Modifier.height(220.dp).fillMaxWidth()) {
+        LazyColumn (Modifier.safeDrawingPadding()){
+            item {
+                CustomCard(modifierBox =  Modifier.fillMaxWidth().padding(8.dp)) {
+                    Row (Modifier.fillMaxSize()){
+//                                    if (accesstoken.logo!= null)
+                        CustomImageView1(
+                            modifier = Modifier
+                                .border(
+                                    1.dp,
+                                    MaterialTheme.colorScheme.primary,
+                                    RoundedCornerShape(12.dp)
+                                )
+                                .size(50.dp)
+                                .clickable {
 
-           repeat(5){
-               item {
-                   Card(Modifier.width(160.dp).padding(8.dp).fillParentMaxHeight()) {
-
-                   }
-               }
-           }
-       }
-        Text("اخر المنشورات")
-        //
-
-        repeat(15){
-            Card(Modifier.height(130.dp).padding(8.dp).fillMaxWidth()) {
-
+                                },
+                            imageUrl = SingletonRemoteConfig.remoteConfig.BASE_IMAGE_URL + SingletonRemoteConfig.remoteConfig.SUB_FOLDER_STORE_COVERS + "y",
+//                            imageUrl = SingletonRemoteConfig.remoteConfig.BASE_IMAGE_URL + SingletonRemoteConfig.remoteConfig.SUB_FOLDER_STORE_COVERS + "y",
+                        )
+                        Column(Modifier.padding(8.dp), verticalArrangement = Arrangement.Top) { Text( "مرحبا بك: "+"أمجد" + " " + "قايد") }
+                    }
+                }
             }
+            item {
+                HorizontalDivider(Modifier.padding(8.dp))
+                Text("Reels",Modifier.padding(8.dp))
+
+                LazyRow(Modifier.height(250.dp).fillMaxWidth()) {
+
+                    itemsIndexed(portraitPosts){index, item ->
+                        Card(Modifier.width(150.dp).padding(8.dp).fillParentMaxHeight().clickable {
+                            val intent = Intent(Intent.ACTION_VIEW, Uri.parse(item.url))
+                            startActivity(intent)
+                        }) {
+                            CustomImageView1(item.image, modifier = Modifier.fillParentMaxSize(), contentScale = ContentScale.Inside, isLoading = false)
+                        }
+
+                    }
+                }
+                HorizontalDivider(Modifier.padding(8.dp))
+                Text("اخر المنشورات",Modifier.padding(8.dp))
+            }
+
+            //
+            itemsIndexed(unportraitPosts){index, item ->
+
+                Card(Modifier.height(250.dp).padding(8.dp).fillMaxWidth().clickable {
+                    val intent = Intent(Intent.ACTION_VIEW, Uri.parse(item.url))
+                    startActivity(intent)
+                }) {
+                    CustomImageView1(item.image, modifier = Modifier.fillMaxSize(), contentScale = ContentScale.FillHeight, isLoading = false)
+                }
+            }
+
+
         }
+//        Spacer()
+
+//        repeat(15){
+//
+//        }
 
     }
 
@@ -520,6 +655,26 @@ class InsideStoreActivity : ComponentActivity() {
         } else {
             Log.e("ffdd", isEmptyComponent.toString())
             lazyListScope.stickyHeader {
+//                CustomCard(modifierBox =  Modifier.fillMaxWidth().padding(8.dp)) {
+//                    Row (Modifier.fillMaxSize().height(25.dp), verticalAlignment = Alignment.CenterVertically){
+////                                    if (accesstoken.logo!= null)
+//                        CustomIcon(Icons.Outlined.Search, modifierIcon = Modifier.size(20.dp)) {
+//
+//                        }
+//
+//                        Text("ابحث عن المنتجات هنا",Modifier.padding(4.dp), fontSize = 10.sp)
+//                    }
+//                }
+//
+//                CustomCard(modifierBox =  Modifier.fillMaxWidth().padding(8.dp).clickable {
+//
+//                    gotoOrders()
+//                }){
+//                    Text("طلباتي")
+//                }
+
+
+
                 DropDownDemo()
                 if (isLoadingLinear)
                 LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
@@ -527,8 +682,7 @@ class InsideStoreActivity : ComponentActivity() {
                 LazyRow(
                     Modifier
                         .height(55.dp)
-                        .background(Color.White)
-                        .fillMaxWidth()) {
+                        .fillMaxWidth().background(Color.White)) {
                     //                                    stickyHeader {
                     //                                        Card {
                     //                                            Text(selectedSection.sectionName)
@@ -579,8 +733,7 @@ class InsideStoreActivity : ComponentActivity() {
                 LazyRow(
                     Modifier
                         .height(40.dp)
-                        .background(Color.White)
-                        .fillMaxWidth()) {
+                        .fillMaxWidth().background(Color.White)) {
                     //                                    stickyHeader {
                     //                                        Card {
                     //                                            Text(selectedSection.sectionName)
@@ -589,7 +742,8 @@ class InsideStoreActivity : ComponentActivity() {
                     itemsIndexed(home!!.storeNestedSections.filter { it.storeSectionId == selectedSection.value!!.id }) { index, item ->
                         Card(
                             colors = CardDefaults.cardColors(
-                                containerColor = MaterialTheme.colorScheme.surface
+                                containerColor =  MaterialTheme.colorScheme.surface
+//
                             ),
                             modifier = Modifier
                                 .padding(6.dp)
@@ -636,64 +790,167 @@ class InsideStoreActivity : ComponentActivity() {
                         readProducts()
                     },
                 ) {
-                    products.value.forEach { product ->
-                        Card(
-                            colors = CardDefaults.cardColors(
-                                containerColor = MaterialTheme.colorScheme.surface
-                            ),
-                            modifier =
-                            Modifier
-                                .fillMaxWidth()
-                                .padding(5.dp)
-                                .height(100.dp)
-                                .border(
-                                    1.dp, Color.Gray,
-                                    RoundedCornerShape(12.dp)
-                                )
-                                .clickable {
+//                    if ()
+//                    LazyRow (Modifier.height(200.dp).fillMaxWidth()) {
+//                        productViews.value.forEach { item ->
+//                            item{
+//                                Card(
+//                                    Modifier
+//                                        .padding(8.dp)
+//                                        .width(100.dp)
+//                                        .clickable {
+////                                    selectedPaymentMethod = item
+////                                    isShowSelectPaymentMethod = false
+//
+////                                        if (item.id == 1) {
+////                                            isShowShowPaymentTypes = true
+//////                                        intentFunWhatsapp()
+////                                        } else
+////                                            selectedPaymentMethod = item
+////                                        isShowSelectPaymentMethod = false
+////                                    },
+////                            colors = CardColors(
+////                                containerColor = Color.White,
+////                                contentColor = Color.Black,
+////                                disabledContainerColor = Color.Blue,
+////                                disabledContentColor = Color.Cyan
+////                            )
+//                                        }
+//                                ) {
+//                                    Column(
+//                                        Modifier.fillMaxSize(),
+//                                        horizontalAlignment = Alignment.CenterHorizontally,
+//                                        verticalArrangement = Arrangement.Center
+//                                    ) {
+//                                        if (item.product.images.isNotEmpty())
+//                                            CustomImageView(
+//                                                modifier = Modifier
+//                                                    .fillMaxWidth()
+//                                                    .height(150.dp),
+//                                                context = this@InsideStoreActivity,
+//                                                imageUrl = SingletonRemoteConfig.remoteConfig.BASE_IMAGE_URL +
+//                                                        SingletonRemoteConfig.remoteConfig.SUB_FOLDER_PRODUCT +
+//                                                        item.product.images.first().image,
+//                                                okHttpClient = requestServer.createOkHttpClientWithCustomCert()
+//                                            )
+//                                        else
+//                                            AsyncImage(
+//                                                modifier =  Modifier
+//                                                    .fillMaxWidth()
+//                                                    .height(150.dp)
+//                                                    .padding(5.dp),
+//                                                model = R.drawable.logo,
+//                                                contentDescription = null
+//                                            )
+//
+//                                        HorizontalDivider(Modifier.padding(5.dp))
+//                                        Text(item.product.productName, fontSize = 12.sp)
+//                                    }
+//
+//                                }
+//                            }
+//                        }
+//                    }
 
+                    productViews.value.filter { it.id == 2 }.forEach { productView ->
+                        Text(productView.name)
+                        Spacer(Modifier.height(8.dp))
+                        LazyRow (Modifier.height(150.dp)) {
+                            itemsIndexed(productView.products){index, product ->
+                                CustomCard(modifierBox = Modifier.clickable {
                                     goToAddToCart(product)
                                 }) {
-                            Row(
-                                Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.SpaceBetween,
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                Column {
-                                    Text(
-                                        product.product.productName,
-                                        Modifier.padding(8.dp),
-                                        fontWeight = FontWeight.Bold,
-                                        fontSize = 16.sp
-                                    )
+                                    Column(
+                                        verticalArrangement = Arrangement.Center,
+                                        horizontalAlignment = Alignment.CenterHorizontally
+                                    ) {
+                                        CustomImageView(
+                                            modifier = Modifier
+                                                .size(80.dp)
+                                                .padding(8.dp)
+                                                .border(1.dp, MaterialTheme.colorScheme.primary, RoundedCornerShape(16.dp))
+                                                .clip(RoundedCornerShape(16.dp)),
+                                            context = this@InsideStoreActivity,
+                                            imageUrl =
+                                            (if (product.product.images.isNotEmpty()) SingletonRemoteConfig.remoteConfig.BASE_IMAGE_URL +
+                                                    SingletonRemoteConfig.remoteConfig.SUB_FOLDER_PRODUCT +
+                                                    product.product.images.first().image else R.drawable.logo).toString(),
+                                            okHttpClient = requestServer.createOkHttpClientWithCustomCert()
+                                        )
+                                        HorizontalDivider()
+                                        Text(product.product.productName,Modifier.padding(8.dp))
+
+                                    }
+
                                 }
 
-                                if (product.product.images.firstOrNull() != null)
-                                    CustomImageView(
-                                        modifier = Modifier
-                                            .size(100.dp)
-                                            .padding(5.dp),
-                                        context = this@InsideStoreActivity,
-                                        imageUrl = SingletonRemoteConfig.remoteConfig.BASE_IMAGE_URL +
-                                                SingletonRemoteConfig.remoteConfig.SUB_FOLDER_PRODUCT +
-                                                product.product.images.first().image,
-                                        okHttpClient = requestServer.createOkHttpClientWithCustomCert()
-                                    )
-                                //                                        if (product.options.firstOrNull() != null){
-                                //                                            Text(product.options.first().name,Modifier.padding(8.dp))
-                                //                                            Text(
-                                //                                                modifier = Modifier.padding(8.dp),
-                                //                                                text = formatPrice(product.options.first().price) + " ريال ",
-                                //                                                fontWeight = FontWeight.Bold,
-                                //                                                fontSize = 16.sp,
-                                //                                                color = Color.Black
-                                //                                            )
-                                //                                        }
 
                             }
                         }
+                    }
+                    productViews.value.filter { it.id == 1 }.forEach { productView ->
+                        Text(productView.name)
+                        productView.products.forEach { product ->
+                            Card(
+                                colors = CardDefaults.cardColors(
+                                    containerColor = MaterialTheme.colorScheme.surface
+                                ),
+                                modifier =
+                                Modifier
+                                    .fillMaxWidth()
+                                    .padding(5.dp)
+                                    .height(100.dp)
+                                    .border(
+                                        1.dp, Color.Gray,
+                                        RoundedCornerShape(12.dp)
+                                    )
+                                    .clickable {
+
+                                        goToAddToCart(product)
+                                    }) {
+                                Row(
+                                    Modifier.fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.SpaceBetween,
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Column {
+                                        Text(
+                                            product.product.productName,
+                                            Modifier.padding(8.dp),
+                                            fontWeight = FontWeight.Bold,
+                                            fontSize = 16.sp
+                                        )
+                                    }
+
+                                    if (product.product.images.firstOrNull() != null)
+                                        CustomImageView(
+                                            modifier = Modifier
+                                                .size(100.dp)
+                                                .padding(5.dp),
+                                            context = this@InsideStoreActivity,
+                                            imageUrl = SingletonRemoteConfig.remoteConfig.BASE_IMAGE_URL +
+                                                    SingletonRemoteConfig.remoteConfig.SUB_FOLDER_PRODUCT +
+                                                    product.product.images.first().image,
+                                            okHttpClient = requestServer.createOkHttpClientWithCustomCert()
+                                        )
+                                    //                                        if (product.options.firstOrNull() != null){
+                                    //                                            Text(product.options.first().name,Modifier.padding(8.dp))
+                                    //                                            Text(
+                                    //                                                modifier = Modifier.padding(8.dp),
+                                    //                                                text = formatPrice(product.options.first().price) + " ريال ",
+                                    //                                                fontWeight = FontWeight.Bold,
+                                    //                                                fontSize = 16.sp,
+                                    //                                                color = Color.Black
+                                    //                                            )
+                                    //                                        }
+
+                                }
+                        }
+
+                        }
 
                     }
+
                 }
 
 
@@ -705,6 +962,8 @@ class InsideStoreActivity : ComponentActivity() {
         if (!aToken.isSetAccessToken()) {
             gotoLogin()
         } else {
+            if (owaisMode)stateController.successState()
+            else
             readStores()
         }
     }
@@ -734,10 +993,11 @@ class InsideStoreActivity : ComponentActivity() {
             stateControllerProducts.errorStateRead(fail)
             else
                 stateControllerProducts.errorStateAUD(fail)
+            isLoadingLinear = false
         }
         ){data->
 
-            products.value =
+            productViews.value =
                 MyJson.IgnoreUnknownKeys.decodeFromString(
                     data
                 )
@@ -802,13 +1062,11 @@ class InsideStoreActivity : ComponentActivity() {
             verticalArrangement = Arrangement.Center
         ) {
 
-            Box {
+            Box(Modifier.background(Color.White)) {
                 Row(
                     horizontalArrangement = Arrangement.SpaceBetween,
-
                     verticalAlignment = Alignment.CenterVertically,
                     modifier = Modifier
-                        .background(Color.White)
                         .padding(8.dp)
                         .fillMaxWidth()
                         .clickable {
@@ -833,7 +1091,7 @@ class InsideStoreActivity : ComponentActivity() {
                                 selectedSection.value = home!!.storeSections.first { it.storeCategoryId == selectedCategory.value!!.id }
                                 selectedStoreNestedSection.value = home!!.storeNestedSections.first { it.storeSectionId == selectedSection.value!!.id }
                                 isDropDownExpanded.value = false
-                                products.value = emptyList()
+                                productViews.value = emptyList()
                                 readProducts()
                             })
                     }
@@ -842,9 +1100,7 @@ class InsideStoreActivity : ComponentActivity() {
 
         }
     }
-    private fun goToAddToCart(
-        s: StoreProduct
-    ) {
+    private fun goToAddToCart(s: StoreProduct) {
 
         val intent = Intent(
             this,
@@ -892,7 +1148,7 @@ class InsideStoreActivity : ComponentActivity() {
         Firebase.messaging.subscribeToTopic(appId)
             .addOnCompleteListener { task ->
                 if (task.isSuccessful) {
-                    requestServer.serverConfig.setSubscribeApp("1")
+                    requestServer.serverConfig.setSubscribeApp(appId)
                     Log.e("subsecribed",appId)
                 }
             }
@@ -947,6 +1203,21 @@ class InsideStoreActivity : ComponentActivity() {
             onSuccess()
         }
     }
+
+    private fun gotoOrders() {
+        val intent = Intent(this, OrdersActivity::class.java)
+        startActivity(intent)
+    }
+    private fun gotoSettings() {
+        val intent = Intent(this, SettingsActivity::class.java)
+        startActivity(intent)
+    }
+
+    private fun gotoSearch() {
+        val intent = Intent(this, SearchActivity::class.java)
+        startActivity(intent)
+    }
 }
 
 data class PageModel(val pageName:String,val pageId:Int)
+data class Post(val image:String ,val url:String)

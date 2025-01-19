@@ -6,6 +6,7 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
+import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.border
@@ -19,6 +20,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.grid.GridCells
@@ -29,11 +31,13 @@ import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.ArrowForward
+import androidx.compose.material.icons.automirrored.filled.Send
+import androidx.compose.material.icons.filled.Send
 import androidx.compose.material.icons.outlined.CheckCircle
 import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
-import androidx.compose.material3.CardColors
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
@@ -41,6 +45,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.RadioButton
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -50,7 +55,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -61,9 +65,13 @@ import com.owaistelecom.telecom.shared.MyJson
 import com.owaistelecom.telecom.shared.StateController
 import com.owaistelecom.telecom.shared.ADControll
 import com.owaistelecom.telecom.shared.CustomCard
+import com.owaistelecom.telecom.shared.CustomIcon
 import com.owaistelecom.telecom.shared.CustomImageView
+import com.owaistelecom.telecom.shared.CustomRow
+import com.owaistelecom.telecom.shared.CustomRow2
 import com.owaistelecom.telecom.shared.IconDelete
 import com.owaistelecom.telecom.shared.MainCompose1
+import com.owaistelecom.telecom.shared.MyTextField
 import com.owaistelecom.telecom.shared.RequestServer
 import com.owaistelecom.telecom.shared.SingletonRemoteConfig
 import com.owaistelecom.telecom.shared.SingletonStores
@@ -73,8 +81,10 @@ import com.owaistelecom.telecom.ui.theme.OwaisTelecomTheme
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.encodeToJsonElement
 
+//object SingletonP
 class CartPreviewActivity : ComponentActivity() {
     private var locations by mutableStateOf<List<Location>>(emptyList())
+    private var paymentsTypes by mutableStateOf<List<PaymentType>>(emptyList())
     private val stateController = StateController()
     var selectedLocation by mutableStateOf<Location?>(null)
 
@@ -82,13 +92,16 @@ class CartPreviewActivity : ComponentActivity() {
     val requestServer = RequestServer(this)
     var cartView by mutableStateOf(true)
     var isShowSelectPaymentMethod by mutableStateOf(false)
+    var isShowShowPaymentTypes by mutableStateOf(false)
     var selectedPaymentMethod by mutableStateOf<PaymentModel?>(null)
+
+    var paidCode by mutableStateOf<String>("")
 
 
     val list = listOf<PaymentModel>(
-        PaymentModel("عند التوصيل", R.drawable.ondelivery, 0),
+        PaymentModel("عند التوصيل", R.drawable.ondelivery.toString(), 0),
 //        PaymentModel("من المحفظة", R.drawable.wallet, 2),
-        PaymentModel("دفع الكتروني", R.drawable.epay, 1)
+        PaymentModel("دفع الكتروني", R.drawable.epay.toString(), 1)
     )
 
     val radioOptions = listOf(
@@ -98,6 +111,7 @@ class CartPreviewActivity : ComponentActivity() {
 
 
     var selectedOption by mutableStateOf(radioOptions[0])
+    var title by mutableStateOf("")
 
     fun onOptionSelected(newOption: DeliveryOption) {
         selectedOption = newOption
@@ -106,31 +120,47 @@ class CartPreviewActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         stateController.successState()
+
+        enableEdgeToEdge()
         setContent {
             BackHand()
             //
 
             OwaisTelecomTheme {
-                Column(
-                    Modifier.fillMaxSize(),
-                    verticalArrangement = Arrangement.Top,
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    if (cartView) {
-                        Text("السلة")
-                        HorizontalDivider()
-                        MainContentCartPreview()
-                    } else {
-                        MainCompose1(0.dp,stateController,this@CartPreviewActivity,{
-
-                        }) {
-                            Text("الطلب",)
-                            MainContentOrderPreview()
+                    Column(
+                        Modifier.fillMaxSize().safeDrawingPadding(),
+                        verticalArrangement = Arrangement.Top,
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        CustomCard(modifierBox = Modifier) {
+                            CustomRow2{
+                                CustomIcon(Icons.AutoMirrored.Default.ArrowBack, border = true) {
+                                    if (cartView) {
+                                        finish()
+                                    } else
+                                        cartView = true
+                                }
+                                Text(title)
+                            }
                         }
-                        if (isShowReadLocations)modalShowLocations()
-                        if (isShowSelectPaymentMethod) ChoosePaymentMethod()
+                        if (cartView) {
+                            title = "عرض السلة"
+//                            Text("السلة")
+//                            HorizontalDivider()
+                            MainContentCartPreview()
+                        } else {
+                            MainCompose1(0.dp, stateController, this@CartPreviewActivity, {
+
+                            }) {
+                                title = "تأكيد الطلب"
+//                                Text("الطلب",)
+                                MainContentOrderPreview()
+                            }
+                            if (isShowReadLocations) modalShowLocations()
+                            if (isShowSelectPaymentMethod) ChoosePaymentMethod()
+                            if (isShowShowPaymentTypes) ChoosePaymentTypes()
+                        }
                     }
-                }
             }
         }
     }
@@ -165,7 +195,7 @@ class CartPreviewActivity : ComponentActivity() {
                                     verticalAlignment = Alignment.CenterVertically,
                                     horizontalArrangement = Arrangement.SpaceBetween
                                 ) {
-                                    Text(SingletonStores.selectedStore.name)
+                                    Text(SingletonStores.selectedStore.name,Modifier.padding(8.dp))
                                     CustomImageView(
                                         modifier = Modifier
                                             .size(50.dp)
@@ -188,7 +218,7 @@ class CartPreviewActivity : ComponentActivity() {
                                     Text(
                                         "الاجمالي : " + SingletonCart.getAllCartProductsSum(
                                             SingletonStores.selectedStore
-                                        )
+                                        ),Modifier.padding(8.dp)
                                     )
                                 }
                                 HorizontalDivider()
@@ -196,7 +226,7 @@ class CartPreviewActivity : ComponentActivity() {
                                     onClick = {
                                         cartView = false
                                     },
-                                    modifier = Modifier.padding(top = 4.dp).fillMaxWidth()
+                                    modifier = Modifier.padding( 8.dp).fillMaxWidth()
                                 ) {
                                     Text(text = "متابعة")
                                 }
@@ -251,7 +281,7 @@ class CartPreviewActivity : ComponentActivity() {
                                         Text(cartProductOption.productOption.name)
                                         Text(
                                             modifier = Modifier.padding(8.dp),
-                                            text = formatPrice(cartProductOption.productOption.price) + " ريال ",
+                                            text = formatPrice(cartProductOption.productOption.price) +" "+ cartProductOption.productOption.currency.name ,
                                             fontWeight = FontWeight.Bold,
                                             color = MaterialTheme.colorScheme.primary
                                         )
@@ -298,8 +328,8 @@ class CartPreviewActivity : ComponentActivity() {
                 content = {
                     item {
                         CustomCard(modifierBox = Modifier) {
-                            Text("خيار استلام الطلب")
                             Column(Modifier.selectableGroup()) {
+                                Text("خيار استلام الطلب", modifier = Modifier.padding(14.dp))
                                 radioOptions.forEach { text ->
                                     Row(
                                         Modifier.fillMaxWidth().height(56.dp)
@@ -351,7 +381,7 @@ class CartPreviewActivity : ComponentActivity() {
 
                         },"طريقة الدفع")
                         {
-                            if (selectedPaymentMethod != null)
+                            if (selectedPaymentMethod != null )
                                 Row (
                                     Modifier
                                         .fillMaxWidth()
@@ -364,6 +394,27 @@ class CartPreviewActivity : ComponentActivity() {
                                         imageVector = Icons.Outlined.CheckCircle,
                                         contentDescription = ""
                                     )
+
+                                    if (selectedPaymentMethod!!.id != 0){
+                                        Row () {
+                                            AsyncImage(
+                                                modifier = Modifier
+                                                    .size(50.dp)
+                                                    .padding(10.dp),
+                                                model = selectedPaymentMethod!!.image,
+                                                contentDescription = null
+                                            )
+                                        }
+                                        MyTextField(
+                                            hinty = "ادخل كود الشراء هنا"
+                                        ) {
+                                            paidCode = it
+                                        }
+
+                                    }
+
+
+
                                     Text(
                                         modifier = Modifier.padding(start = 8.dp),
                                         text = selectedPaymentMethod!!.name,
@@ -523,21 +574,43 @@ class CartPreviewActivity : ComponentActivity() {
             isShowReadLocations = true
         }
     }
+    fun readPaymentTypes() {
+        stateController.startAud()
+        val body = builderForm3()
+            .addFormDataPart("storeId",SingletonStores.selectedStore.id.toString())
+            .build()
+
+        requestServer.request2(body, "getPaymentTypes", { code, fail ->
+            stateController.errorStateAUD(fail)
+        }
+        ) { data ->
+            val result: List<PaymentType> =
+                MyJson.IgnoreUnknownKeys.decodeFromString(
+                    data
+                )
+
+            paymentsTypes = result
+//            SelectedStore.store.value!! .latLng = latiLng
+//            MyToast(this,"تم بنجاح")
+            stateController.successStateAUD()
+        }
+    }
 
 
     fun confirmOrder() {
         stateController.startAud()
 
-
         val bodyBuilder = builderForm3()
             .addFormDataPart("orderProducts", MyJson.MyJson.encodeToJsonElement(SingletonCart.getProductsIdsWithQnt()).toString())
             .addFormDataPart("storeId", SingletonStores.selectedStore.id.toString())
+
 
         if (selectedLocation != null) {
             bodyBuilder.addFormDataPart("locationId", selectedLocation!!.id.toString())
         }
         if (selectedPaymentMethod != null){
             bodyBuilder.addFormDataPart("paid", selectedPaymentMethod!!.id.toString())
+            bodyBuilder.addFormDataPart("paidCode", paidCode)
         }
 
         val body = bodyBuilder.build()
@@ -592,21 +665,81 @@ class CartPreviewActivity : ComponentActivity() {
                             Modifier
                                 .padding(8.dp)
                                 .clickable {
-                                    selectedPaymentMethod = item
+//                                    selectedPaymentMethod = item
+//                                    isShowSelectPaymentMethod = false
+
+                                    if (item.id == 1) {
+                                        isShowShowPaymentTypes = true
+//                                        intentFunWhatsapp()
+                                    } else
+                                        selectedPaymentMethod = item
                                     isShowSelectPaymentMethod = false
+                                },
+//                            colors = CardColors(
+//                                containerColor = Color.White,
+//                                contentColor = Color.Black,
+//                                disabledContainerColor = Color.Blue,
+//                                disabledContentColor = Color.Cyan
+//                            )
+                        ) {
+                            Column(
+                                Modifier.fillMaxSize(),
+                                horizontalAlignment = Alignment.CenterHorizontally,
+                                verticalArrangement = Arrangement.Center
+                            ) {
+                                AsyncImage(
+                                    modifier = Modifier
+                                        .size(100.dp)
+                                        .padding(10.dp),
+                                    model = item.image.toInt(),
+                                    contentDescription = null
+                                )
+                                HorizontalDivider(Modifier.padding(5.dp))
+                                Text(item.name, fontSize = 12.sp)
+                            }
+
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    @Composable
+    @OptIn(ExperimentalMaterial3Api::class)
+    private fun ChoosePaymentTypes() {
+        if (paymentsTypes.isEmpty())readPaymentTypes()
+        ModalBottomSheet(
+            onDismissRequest = { isShowShowPaymentTypes = false }) {
+            Box(
+                Modifier
+                    .fillMaxSize()
+                    .padding(bottom = 10.dp)
+            ) {
+                LazyVerticalGrid(
+                    columns = GridCells.Fixed(3),
+                ) {
+
+                    itemsIndexed(paymentsTypes) { index, item ->
+                        Card(
+                            Modifier
+                                .padding(8.dp)
+                                .clickable {
+                                    selectedPaymentMethod = PaymentModel(item.name,item.image,item.id)
+//                                    isShowSelectPaymentMethod = false
 
 //                                    if (item.id == 3) {
 ////                                        intentFunWhatsapp()
 //                                    } else
 //                                        selectedPaymentMethod = item
-//                                    isShowSelectPaymentMethod = false
+                                    isShowShowPaymentTypes = false
                                 },
-                            colors = CardColors(
-                                containerColor = Color.White,
-                                contentColor = Color.Black,
-                                disabledContainerColor = Color.Blue,
-                                disabledContentColor = Color.Cyan
-                            )
+//                            colors = CardColors(
+//                                containerColor = Color.White,
+//                                contentColor = Color.Black,
+//                                disabledContainerColor = Color.Blue,
+//                                disabledContentColor = Color.Cyan
+//                            )
                         ) {
                             Column(
                                 Modifier.fillMaxSize(),
@@ -637,7 +770,10 @@ data class DeliveryOption (val id:Int, val name:String)
 @Serializable
 data class Location (val id:Int, val street:String)
 
-data class PaymentModel(val name:String, val image:Int, val id:Int)
+@Serializable
+data class PaymentType (val id:Int, val name:String, val image:String)
+
+data class PaymentModel(val name:String, val image: String, val id:Int)
 
 @Composable
 private fun CardView(button : @Composable()()->Unit = {},title:String, content: @Composable() (ColumnScope.() -> Unit)) {
@@ -691,15 +827,15 @@ fun OutLinedButton( modifier :Modifier = Modifier
     Button(
         onClick = onClick
         ,
-        colors = ButtonDefaults.buttonColors(
-            containerColor = Color.White, // Background color
-        ),
+//        colors = ButtonDefaults.buttonColors(
+//            containerColor = Color.White, // Background color
+//        ),
         modifier = modifier ,
     ) {
 
         Text(
             text = text,
-            color = MaterialTheme.colorScheme.primary, fontSize = 14.sp,
+            fontSize = 14.sp,
         )
     }
 }

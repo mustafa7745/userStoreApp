@@ -28,28 +28,6 @@ data class ProductOption(
 data class ProductImage(
     val image: String
 )
-@Serializable
-data class Option(
-    val id : Int,
-    val name: String
-)
-@Serializable
-data class StoreProducts(val storeCategory: StoreCategory, val storeProducts: List<StoreProduct>)
-
-@Serializable
-data class MyProduct(
-    val id:Int,
-    val name: String,
-    val description: String?,
-    val images: List<ProductImage>
-)
-
-@Serializable
-data class MyCategory(
-    val id: Int,
-    val name: String
-)
-
 
 @Serializable
 data class Product(
@@ -70,8 +48,14 @@ data class ErrorMessage(
 @Serializable
 data class AccessToken(
     val token: String,
+    val expireAt:String
+)
+
+@Serializable
+data class UserInfo(
     val firstName: String,
+    val secondName: String?,
+    val thirdName: String?,
     val lastName: String,
     val logo: String?,
-    val expireAt:String
 )
