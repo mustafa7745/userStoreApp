@@ -8,6 +8,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -40,6 +41,7 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LinearProgressIndicator
@@ -48,6 +50,8 @@ import androidx.compose.material3.Tab
 import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
 import androidx.compose.material3.VerticalDivider
+import androidx.compose.material3.carousel.HorizontalMultiBrowseCarousel
+import androidx.compose.material3.carousel.rememberCarouselState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -125,6 +129,13 @@ class InsideStoreActivity : ComponentActivity() {
        PageModel("متجر اويس تيليكوم", 0),
        PageModel("اخر العروض", 1),
     )
+    val adsList = listOf(
+        PageModel("https://couponswala.com/blog/wp-content/uploads/2022/09/Food-Combo-Offers.jpg", 0),
+        PageModel("https://couponswala.com/blog/wp-content/uploads/2022/09/Food-Combo-Offers.jpg", 1),
+        PageModel("https://couponswala.com/blog/wp-content/uploads/2022/09/Food-Combo-Offers.jpg", 1),
+        PageModel("https://couponswala.com/blog/wp-content/uploads/2022/09/Food-Combo-Offers.jpg", 1),
+        PageModel("https://couponswala.com/blog/wp-content/uploads/2022/09/Food-Combo-Offers.jpg", 1),
+    )
 
     private var portraitPosts by mutableStateOf<List<Post>>(listOf(
         Post("https://i.ytimg.com/vi/rMAol1wA5Zs/oar2.jpg","https://www.youtube.com/shorts/rMAol1wA5Zs"),
@@ -150,29 +161,8 @@ class InsideStoreActivity : ComponentActivity() {
     @OptIn(ExperimentalFoundationApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-//
-        if (!requestServer.serverConfig.isSetSubscribeApp()){
-            subscribeToAppTopic()
-        }
-        if (!requestServer.serverConfig.isSetRemoteConfig()){
 
-            stateController.startRead()
-            requestServer.initVarConfig({
-                stateController.errorStateRead("enable get remote config")
-            }){
-//                stateController.successState()
-//                Log.e("serverConfig",SingletonRemoteConfig.remoteConfig.toString())
-                SingletonRemoteConfig.remoteConfig = requestServer.serverConfig.getRemoteConfig()
-                checkTokenToRead()
-            }
-        }else{
-            checkTokenToRead()
-        }
-
-//        stateController
-
-
-
+        MainInit()
 
         enableEdgeToEdge()
         setContent {
@@ -205,8 +195,27 @@ class InsideStoreActivity : ComponentActivity() {
         }
     }
 
+    private fun MainInit() {
+        if (!requestServer.serverConfig.isSetSubscribeApp()) {
+            subscribeToAppTopic()
+        }
+        if (!requestServer.serverConfig.isSetRemoteConfig()) {
+            stateController.startRead()
+            requestServer.initVarConfig({
+                stateController.errorStateRead("enable get remote config")
+            }) {
+    //                stateController.successState()
+    //                Log.e("serverConfig",SingletonRemoteConfig.remoteConfig.toString())
+                SingletonRemoteConfig.remoteConfig = requestServer.serverConfig.getRemoteConfig()
+                checkTokenToRead()
+            }
+        } else {
+            checkTokenToRead()
+        }
+    }
 
 
+    @OptIn(ExperimentalMaterial3Api::class)
     @Composable
     private fun MyStore() {
 //        // Get current window insets (for the system navigation bar)
@@ -233,28 +242,49 @@ class InsideStoreActivity : ComponentActivity() {
                                 horizontalArrangement = Arrangement.SpaceBetween
                             ) {
                                 Column (Modifier.width(80.dp).clickable {  },verticalArrangement = Arrangement.SpaceBetween, horizontalAlignment = Alignment.CenterHorizontally) {
-                                    CustomImageViewUri(modifier = Modifier.size(50.dp), imageUrl = R.drawable.homeicon,)
+                                    CustomImageViewUri(modifier = Modifier.size(40.dp), imageUrl = R.drawable.homeicon,)
                                     HorizontalDivider(Modifier.padding(8.dp))
-                                    Text("الرئيسية")
+                                    Text("الرئيسية", fontSize = 10.sp)
                                 }
                                 Column (Modifier.width(80.dp).clickable { gotoOrders() },verticalArrangement = Arrangement.SpaceBetween, horizontalAlignment = Alignment.CenterHorizontally) {
-                                    CustomImageViewUri(modifier = Modifier.size(50.dp), imageUrl = R.drawable.ordericon,)
+                                    CustomImageViewUri(modifier = Modifier.size(40.dp), imageUrl = R.drawable.ordericon,)
                                     HorizontalDivider(Modifier.padding(8.dp))
-                                    Text("طلباتي")
+                                    Text("طلباتي", fontSize = 10.sp)
                                 }
                                 Column (Modifier.width(80.dp).clickable {  gotoSearch() },verticalArrangement = Arrangement.SpaceBetween, horizontalAlignment = Alignment.CenterHorizontally) {
-                                    CustomImageViewUri(modifier = Modifier.size(50.dp), imageUrl = R.drawable.seearchwithman,)
+                                    CustomImageViewUri(modifier = Modifier.size(40.dp), imageUrl = R.drawable.seearchwithman,)
                                     HorizontalDivider(Modifier.padding(8.dp))
-                                    Text("البحث")
+                                    Text("البحث", fontSize = 10.sp)
                                 }
                                 Column (Modifier.width(80.dp).clickable { gotoSettings() },verticalArrangement = Arrangement.SpaceBetween, horizontalAlignment = Alignment.CenterHorizontally) {
-                                    CustomImageViewUri(modifier = Modifier.size(50.dp), imageUrl = R.drawable.settingicon,)
+                                    CustomImageViewUri(modifier = Modifier.size(40.dp), imageUrl = R.drawable.settingicon,)
                                     HorizontalDivider(Modifier.padding(8.dp))
-                                    Text("الاعدادات")
+                                    Text("الاعدادات", fontSize = 10.sp)
                                 }
                             }
-
+                            HorizontalDivider(Modifier.fillMaxWidth())
+                            val carouselState = rememberCarouselState { home!!.ads.size }
                             LazyColumn {
+                                item {
+                                    HorizontalMultiBrowseCarousel(state = carouselState,300.dp, itemSpacing = 8.dp, modifier = Modifier.padding(8.dp)) {page->
+                                        val ads =home!!.ads[page]
+                                        CustomImageViewUri(ads.image,Modifier.height(205.dp).clickable {
+                                            if (ads.pid!= null){
+                                                var product:StoreProduct? = null
+                                                productViews.value.forEach {productView ->
+                                                    productView.products.forEach { storeProduct ->
+                                                        if (storeProduct.product.productId == ads.pid){
+                                                            product = storeProduct
+                                                        }
+                                                    }
+                                                }
+                                                if (product != null)
+                                                    goToAddToCart(product!!)
+                                            }
+                                        } .maskClip(MaterialTheme.shapes.extraLarge).background(Color.Red))
+                                    }
+                                }
+
 //                                item {
 //                                    CustomCard(modifierBox =  Modifier.fillMaxWidth().padding(8.dp)) {
 //                                        Row (Modifier.fillMaxSize()){
@@ -654,35 +684,14 @@ class InsideStoreActivity : ComponentActivity() {
             }
         } else {
             Log.e("ffdd", isEmptyComponent.toString())
+
+
             lazyListScope.stickyHeader {
-//                CustomCard(modifierBox =  Modifier.fillMaxWidth().padding(8.dp)) {
-//                    Row (Modifier.fillMaxSize().height(25.dp), verticalAlignment = Alignment.CenterVertically){
-////                                    if (accesstoken.logo!= null)
-//                        CustomIcon(Icons.Outlined.Search, modifierIcon = Modifier.size(20.dp)) {
-//
-//                        }
-//
-//                        Text("ابحث عن المنتجات هنا",Modifier.padding(4.dp), fontSize = 10.sp)
-//                    }
-//                }
-//
-//                CustomCard(modifierBox =  Modifier.fillMaxWidth().padding(8.dp).clickable {
-//
-//                    gotoOrders()
-//                }){
-//                    Text("طلباتي")
-//                }
-
-
-
                 DropDownDemo()
                 if (isLoadingLinear)
                 LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
                 HorizontalDivider()
-                LazyRow(
-                    Modifier
-                        .height(55.dp)
-                        .fillMaxWidth().background(Color.White)) {
+                LazyRow(Modifier.height(55.dp).fillMaxWidth().background(Color.White)) {
                     //                                    stickyHeader {
                     //                                        Card {
                     //                                            Text(selectedSection.sectionName)
@@ -706,14 +715,18 @@ class InsideStoreActivity : ComponentActivity() {
                                     .fillMaxSize()
                                     .clickable {
                                         if (!isLoadingLinear){
-                                            isLoadingLinear = true
-                                            selectedSection.value = item
-                                            selectedStoreNestedSection.value =
-                                                home!!.storeNestedSections.first { it.storeSectionId == selectedSection.value!!.id }
+                                            if (home!!.storeNestedSections.filter { it.storeSectionId == item.id }.isEmpty()){
+                                                stateController.showMessage("لاتوجد اقسام داخلية لهذا القسم")
+                                            }else{
+                                                Log.e("sss",home!!.storeNestedSections.filter { it.storeSectionId == item.id }.toString())
+                                                isLoadingLinear = true
+                                                selectedSection.value = item
+                                                selectedStoreNestedSection.value =
+                                                    home!!.storeNestedSections.first { it.storeSectionId == selectedSection.value!!.id }
 //                                            products.value = emptyList()
-                                            readProducts()
+                                                readProducts()
+                                            }
                                         }
-
                                     }
                             ) {
                                 Row(
@@ -730,15 +743,7 @@ class InsideStoreActivity : ComponentActivity() {
                         }
                     }
                 }
-                LazyRow(
-                    Modifier
-                        .height(40.dp)
-                        .fillMaxWidth().background(Color.White)) {
-                    //                                    stickyHeader {
-                    //                                        Card {
-                    //                                            Text(selectedSection.sectionName)
-                    //                                        }
-                    //                                    }
+                LazyRow(Modifier.height(40.dp).fillMaxWidth().background(Color.White)) {
                     itemsIndexed(home!!.storeNestedSections.filter { it.storeSectionId == selectedSection.value!!.id }) { index, item ->
                         Card(
                             colors = CardDefaults.cardColors(
@@ -853,107 +858,109 @@ class InsideStoreActivity : ComponentActivity() {
 //                    }
 
                     productViews.value.filter { it.id == 2 }.forEach { productView ->
-                        Text(productView.name)
-                        Spacer(Modifier.height(8.dp))
-                        LazyRow (Modifier.height(150.dp)) {
-                            itemsIndexed(productView.products){index, product ->
-                                CustomCard(modifierBox = Modifier.clickable {
-                                    goToAddToCart(product)
-                                }) {
-                                    Column(
-                                        verticalArrangement = Arrangement.Center,
-                                        horizontalAlignment = Alignment.CenterHorizontally
-                                    ) {
-                                        CustomImageView(
-                                            modifier = Modifier
-                                                .size(80.dp)
-                                                .padding(8.dp)
-                                                .border(1.dp, MaterialTheme.colorScheme.primary, RoundedCornerShape(16.dp))
-                                                .clip(RoundedCornerShape(16.dp)),
-                                            context = this@InsideStoreActivity,
-                                            imageUrl =
-                                            (if (product.product.images.isNotEmpty()) SingletonRemoteConfig.remoteConfig.BASE_IMAGE_URL +
-                                                    SingletonRemoteConfig.remoteConfig.SUB_FOLDER_PRODUCT +
-                                                    product.product.images.first().image else R.drawable.logo).toString(),
-                                            okHttpClient = requestServer.createOkHttpClientWithCustomCert()
-                                        )
-                                        HorizontalDivider()
-                                        Text(product.product.productName,Modifier.padding(8.dp))
+                        if (productView.products.isNotEmpty()){
+                            Text(productView.name)
+                            Spacer(Modifier.height(8.dp))
+                            LazyRow (Modifier.height(150.dp)) {
+                                itemsIndexed(productView.products){index, product ->
+                                    CustomCard(modifierBox = Modifier.clickable {
+                                        goToAddToCart(product)
+                                    }) {
+                                        Column(
+                                            verticalArrangement = Arrangement.Center,
+                                            horizontalAlignment = Alignment.CenterHorizontally
+                                        ) {
+                                            CustomImageView(
+                                                modifier = Modifier
+                                                    .size(80.dp)
+                                                    .padding(8.dp)
+                                                    .border(1.dp, MaterialTheme.colorScheme.primary, RoundedCornerShape(16.dp))
+                                                    .clip(RoundedCornerShape(16.dp)),
+                                                context = this@InsideStoreActivity,
+                                                imageUrl =
+                                                (if (product.product.images.isNotEmpty()) SingletonRemoteConfig.remoteConfig.BASE_IMAGE_URL +
+                                                        SingletonRemoteConfig.remoteConfig.SUB_FOLDER_PRODUCT +
+                                                        product.product.images.first().image else R.drawable.logo).toString(),
+                                                okHttpClient = requestServer.createOkHttpClientWithCustomCert()
+                                            )
+                                            HorizontalDivider()
+                                            Text(product.product.productName,Modifier.padding(8.dp))
+
+                                        }
 
                                     }
 
-                                }
 
+                                }
+                            }
+                        }
+
+                    }
+                    productViews.value.filter { it.id == 1 }.forEach { productView ->
+                        if (productView.products.isNotEmpty()){
+                            Text(productView.name)
+                            Spacer(Modifier.height(8.dp))
+                            productView.products.forEach { product ->
+                                Card(
+                                    colors = CardDefaults.cardColors(
+                                        containerColor = MaterialTheme.colorScheme.surface
+                                    ),
+                                    modifier =
+                                    Modifier
+                                        .fillMaxWidth()
+                                        .padding(5.dp)
+                                        .height(100.dp)
+                                        .border(
+                                            1.dp, Color.Gray,
+                                            RoundedCornerShape(12.dp)
+                                        )
+                                        .clickable {
+
+                                            goToAddToCart(product)
+                                        }) {
+                                    Row(
+                                        Modifier.fillMaxWidth(),
+                                        horizontalArrangement = Arrangement.SpaceBetween,
+                                        verticalAlignment = Alignment.CenterVertically
+                                    ) {
+                                        Column {
+                                            Text(
+                                                product.product.productName,
+                                                Modifier.padding(8.dp),
+                                                fontWeight = FontWeight.Bold,
+                                                fontSize = 16.sp
+                                            )
+                                        }
+
+                                        if (product.product.images.firstOrNull() != null)
+                                            CustomImageView(
+                                                modifier = Modifier
+                                                    .size(100.dp)
+                                                    .padding(5.dp),
+                                                context = this@InsideStoreActivity,
+                                                imageUrl = SingletonRemoteConfig.remoteConfig.BASE_IMAGE_URL +
+                                                        SingletonRemoteConfig.remoteConfig.SUB_FOLDER_PRODUCT +
+                                                        product.product.images.first().image,
+                                                okHttpClient = requestServer.createOkHttpClientWithCustomCert()
+                                            )
+                                        //                                        if (product.options.firstOrNull() != null){
+                                        //                                            Text(product.options.first().name,Modifier.padding(8.dp))
+                                        //                                            Text(
+                                        //                                                modifier = Modifier.padding(8.dp),
+                                        //                                                text = formatPrice(product.options.first().price) + " ريال ",
+                                        //                                                fontWeight = FontWeight.Bold,
+                                        //                                                fontSize = 16.sp,
+                                        //                                                color = Color.Black
+                                        //                                            )
+                                        //                                        }
+
+                                    }
+                                }
 
                             }
                         }
                     }
-                    productViews.value.filter { it.id == 1 }.forEach { productView ->
-                        Text(productView.name)
-                        productView.products.forEach { product ->
-                            Card(
-                                colors = CardDefaults.cardColors(
-                                    containerColor = MaterialTheme.colorScheme.surface
-                                ),
-                                modifier =
-                                Modifier
-                                    .fillMaxWidth()
-                                    .padding(5.dp)
-                                    .height(100.dp)
-                                    .border(
-                                        1.dp, Color.Gray,
-                                        RoundedCornerShape(12.dp)
-                                    )
-                                    .clickable {
-
-                                        goToAddToCart(product)
-                                    }) {
-                                Row(
-                                    Modifier.fillMaxWidth(),
-                                    horizontalArrangement = Arrangement.SpaceBetween,
-                                    verticalAlignment = Alignment.CenterVertically
-                                ) {
-                                    Column {
-                                        Text(
-                                            product.product.productName,
-                                            Modifier.padding(8.dp),
-                                            fontWeight = FontWeight.Bold,
-                                            fontSize = 16.sp
-                                        )
-                                    }
-
-                                    if (product.product.images.firstOrNull() != null)
-                                        CustomImageView(
-                                            modifier = Modifier
-                                                .size(100.dp)
-                                                .padding(5.dp),
-                                            context = this@InsideStoreActivity,
-                                            imageUrl = SingletonRemoteConfig.remoteConfig.BASE_IMAGE_URL +
-                                                    SingletonRemoteConfig.remoteConfig.SUB_FOLDER_PRODUCT +
-                                                    product.product.images.first().image,
-                                            okHttpClient = requestServer.createOkHttpClientWithCustomCert()
-                                        )
-                                    //                                        if (product.options.firstOrNull() != null){
-                                    //                                            Text(product.options.first().name,Modifier.padding(8.dp))
-                                    //                                            Text(
-                                    //                                                modifier = Modifier.padding(8.dp),
-                                    //                                                text = formatPrice(product.options.first().price) + " ريال ",
-                                    //                                                fontWeight = FontWeight.Bold,
-                                    //                                                fontSize = 16.sp,
-                                    //                                                color = Color.Black
-                                    //                                            )
-                                    //                                        }
-
-                                }
-                        }
-
-                        }
-
-                    }
-
                 }
-
-
             }
         }
     }
@@ -1087,12 +1094,21 @@ class InsideStoreActivity : ComponentActivity() {
                         },
                             onClick = {
 
-                                selectedCategory.value = home!!.storeCategories.first { it.categoryId == username.categoryId }
-                                selectedSection.value = home!!.storeSections.first { it.storeCategoryId == selectedCategory.value!!.id }
-                                selectedStoreNestedSection.value = home!!.storeNestedSections.first { it.storeSectionId == selectedSection.value!!.id }
-                                isDropDownExpanded.value = false
-                                productViews.value = emptyList()
-                                readProducts()
+                                val s = home!!.storeSections.filter { it.storeCategoryId == username.id }
+                                if (s.isEmpty()){
+                                    stateController.showMessage("لاتوجد اقسام لهذه الفئة")
+                                }else{
+                                    if (home!!.storeNestedSections.filter { it.storeSectionId == s.first().id } .isEmpty()){
+                                        stateController.showMessage("هناك اقسام داخلية فارغة")
+                                    }else{
+                                        selectedCategory.value = home!!.storeCategories.first { it.categoryId == username.categoryId }
+                                        selectedSection.value = home!!.storeSections.first { it.storeCategoryId == selectedCategory.value!!.id }
+                                        selectedStoreNestedSection.value = home!!.storeNestedSections.first { it.storeSectionId == selectedSection.value!!.id }
+                                        isDropDownExpanded.value = false
+                                        productViews.value = emptyList()
+                                        readProducts()
+                                    }
+                                }
                             })
                     }
                 }
@@ -1164,8 +1180,8 @@ class InsideStoreActivity : ComponentActivity() {
     private fun initHome(storeId: String, onSuccess: () -> Unit){
         if (homeStorage.isSetHome(storeId)) {
             val diff =
-                Duration.between(homeStorage.getDate(storeId), getCurrentDate()).toMinutes()
-            if (diff <= 1) {
+                Duration.between(homeStorage.getDate(storeId), getCurrentDate()).toSeconds()
+            if (diff <= 20) {
 
                 home = homeStorage.getHome(storeId)
                 Log.e("storedHome", home.toString())

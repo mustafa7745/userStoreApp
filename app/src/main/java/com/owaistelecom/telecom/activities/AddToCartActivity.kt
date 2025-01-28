@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -361,14 +362,14 @@ class AddToCartActivity : ComponentActivity() {
         setContent {
             OwaisTelecomTheme {
                 Column (Modifier.safeDrawingPadding()){
-                    CustomCard(modifierBox = Modifier){
-                        CustomRow2{
-                            CustomIcon(Icons.AutoMirrored.Default.ArrowBack, border = true) {
-                                finish()
-                            }
-                            Text(storeProduct.product.productName)
-                        }
-                    }
+//                    CustomCard(modifierBox = Modifier){
+//                        CustomRow2{
+//                            CustomIcon(Icons.AutoMirrored.Default.ArrowBack, border = true) {
+//                                finish()
+//                            }
+//                            Text(storeProduct.product.productName)
+//                        }
+//                    }
                     MainContent()
                 }
             }
@@ -388,6 +389,20 @@ class AddToCartActivity : ComponentActivity() {
             LazyColumn(
                 Modifier.padding(bottom = 50.dp),
                 content = {
+                    stickyHeader {
+                        CustomCard(modifierBox =  Modifier) {
+                            Row(Modifier.fillMaxWidth().align(Alignment.TopCenter).padding(8.dp), verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Row(verticalAlignment = Alignment.CenterVertically) {
+                                    CustomIcon(Icons.AutoMirrored.Default.ArrowBack, border = true) {
+                                        finish()
+                                    }
+                                    Text(storeProduct.product.productName)
+                                }
+                            }
+                        }
+
+                    }
                     item {
                         val pagerState =
                             rememberPagerState(pageCount = { storeProduct.product.images.size })
@@ -399,50 +414,55 @@ class AddToCartActivity : ComponentActivity() {
                                     .fillMaxWidth(),
                                 contentScale = ContentScale.Inside
                             )
-                        else
-                            HorizontalPager(
-                                pagerState,
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .aspectRatio(1F)
-                            ) { i ->
-                                Card(
-                                    Modifier
-                                        .fillMaxSize().padding(5.dp)
-                                        .border(
-                                            1.dp,
-                                            MaterialTheme.colorScheme.primary,
-                                            RoundedCornerShape(
-                                                16.dp
+                        else{
+                            Box (modifier = Modifier
+                                .fillMaxWidth()
+                                .aspectRatio(1F)){
+                                HorizontalPager(
+                                    pagerState,
+
+                                ) { i ->
+
+                                    Card(
+                                        Modifier
+                                            .fillMaxSize().padding(5.dp)
+                                            .border(
+                                                1.dp,
+                                                MaterialTheme.colorScheme.primary,
+                                                RoundedCornerShape(
+                                                    16.dp
+                                                )
                                             )
-                                        )
-                                        .clip(
-                                            RoundedCornerShape(
-                                                16.dp
-                                            )
-                                        )
-                                        .padding(5.dp),
+                                            .clip(
+                                                RoundedCornerShape(
+                                                    16.dp
+                                                )
+                                            ),
 //                                    colors = CardColors(
 //                                        containerColor = Color.White,
 //                                        contentColor = Color.Black,
 //                                        disabledContainerColor = Color.Blue,
 //                                        disabledContentColor = Color.Cyan
 //                                    )
-                                ) {
+                                    ) {
+
+                                        CustomImageView(
+                                            context = this@AddToCartActivity,
+                                            imageUrl = SingletonRemoteConfig.remoteConfig.BASE_IMAGE_URL+
+                                                    SingletonRemoteConfig.remoteConfig.SUB_FOLDER_PRODUCT+
+                                                    storeProduct.product.images[i].image,
+                                            okHttpClient = requestServer.createOkHttpClientWithCustomCert(),
+                                            contentScale = ContentScale.Crop
+                                        )
 //                                    Log.e("uurr", SingletonRemoteConfig.remoteConfig.BASE_IMAGE_URL+storeProduct.product.images[i].image)
-                                    CustomImageView(
-                                        modifier = Modifier
-                                            .fillMaxWidth(),
-                                        context = this@AddToCartActivity,
-                                        imageUrl = SingletonRemoteConfig.remoteConfig.BASE_IMAGE_URL+
-                                                SingletonRemoteConfig.remoteConfig.SUB_FOLDER_PRODUCT+
-                                                storeProduct.product.images[i].image,
-                                        okHttpClient = requestServer.createOkHttpClientWithCustomCert()
-                                    )
+
+
+                                    }
 
                                 }
-
                             }
+                        }
+
                     }
 
                     item {
@@ -453,13 +473,13 @@ class AddToCartActivity : ComponentActivity() {
                             verticalAlignment = Alignment.CenterVertically,
                                     horizontalArrangement = Arrangement.SpaceBetween
                         ) {
-                            Text(
-                                modifier = Modifier.padding(8.dp),
-                                text = (storeProduct.product.productName),
-                                fontWeight = FontWeight.Bold,
-                                fontSize = 18.sp,
-                                color = Color.Black
-                            )
+//                            Text(
+//                                modifier = Modifier.padding(8.dp),
+//                                text = (storeProduct.product.productName),
+//                                fontWeight = FontWeight.Bold,
+//                                fontSize = 18.sp,
+//                                color = Color.Black
+//                            )
 //                            if(SingletonCart.ifProductInCart(
 //                                    SingletonStores.selectedStore,
 //                                    storeProduct.product
@@ -474,18 +494,14 @@ class AddToCartActivity : ComponentActivity() {
 
                         }
                     }
-                    if (storeProduct.product.productDescription != null)
+//                    if (storeProduct.product.productDescription != null)
+//                        item {
+//                            HorizontalDivider()
+//
+//
+//                        }
                         item {
-                            HorizontalDivider()
-                            Row(
-                                Modifier
-                                    .fillMaxWidth()
-                                    .padding(5.dp)
-                            ) {
-                            }
-                            ReadMoreText(storeProduct.product.productDescription.toString())
-                        }
-                        item {
+                            Spacer(Modifier.height(16.dp))
                             Text(
                                 modifier = Modifier.padding(8.dp),
                                 text = "الخيارات: ",
@@ -510,6 +526,16 @@ class AddToCartActivity : ComponentActivity() {
                                 }
                             }
                         }
+                    item {
+                        Text(
+                            modifier = Modifier.padding(8.dp),
+                            text = "الوصف : ",
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 14.sp,
+                            color = MaterialTheme.colorScheme.primary
+                        )
+                        ReadMoreText(storeProduct.product.productDescription.toString())
+                    }
                 })
 
             Column (

@@ -19,6 +19,8 @@ class VarRemoteConfig(
     var SUB_FOLDER_PRODUCT:String,
     var SUB_FOLDER_STORE_COVERS:String,
     var SUB_FOLDER_STORE_LOGOS:String,
+    var SUB_FOLDER_USERS_LOGOS:String,
+
     var TYPE :String,
     val VERSION:String = "v1/u" ,
 )

@@ -36,9 +36,17 @@ data class StoreSection(
 
 @Serializable
 data class Home(
+    val ads :List<Ads>,
     var storeCategories: List<StoreCategory>,
     var storeSections:List<StoreSection>,
     var storeNestedSections:List<StoreNestedSection>
+)
+
+@Serializable
+data class Ads(
+    val id: Int,
+    val image: String,
+    val pid:Int?,
 )
 
 @Serializable
@@ -66,6 +74,9 @@ data class StoreConfig(
     val products: List<Int>,
     val storeIdReference :Int
 )
+
+
+
 
 
 

@@ -29,8 +29,10 @@ import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Card
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
@@ -55,6 +57,7 @@ import com.owaistelecom.telecom.shared.ADControll
 import com.owaistelecom.telecom.shared.AToken
 import com.owaistelecom.telecom.shared.CustomCard
 import com.owaistelecom.telecom.shared.CustomIcon
+import com.owaistelecom.telecom.shared.CustomIcon2
 import com.owaistelecom.telecom.shared.CustomImageView
 import com.owaistelecom.telecom.shared.CustomImageView1
 import com.owaistelecom.telecom.shared.CustomImageViewUri
@@ -77,6 +80,7 @@ class SearchActivity : ComponentActivity() {
     val stateController = StateController()
     var search by mutableStateOf("")
     private var productViews by mutableStateOf<List<ProductView>>(listOf())
+    var isLoading by mutableStateOf(false)
 
 
 
@@ -94,13 +98,22 @@ class SearchActivity : ComponentActivity() {
                             Row {
                                 TextField(value = search, onValueChange = {
                                     search = it
-                                    if (it.isEmpty())productViews= emptyList()
-                                    else
-                                    search()
-                                }, label = { Text("ابحث هنا") })
+//                                    if (it.isEmpty())productViews= emptyList()
+//                                    else
+//                                    search()
+                                }, label = { Text("ابحث هنا") },
+                                    trailingIcon = {
+                                        CustomIcon2(Icons.Default.Search) {
+                                            if (!isLoading && search.isNotEmpty())
+                                            search()
+                                        }
+                                    }
+                                )
                             }
                         }
                     }
+                    if (isLoading)
+                        LinearProgressIndicator(Modifier.fillMaxWidth())
 
                     LazyColumn {
                         itemsIndexed(productViews){index: Int, item: ProductView ->
@@ -131,6 +144,7 @@ class SearchActivity : ComponentActivity() {
 
     ///
     private fun search() {
+        isLoading = true
         val body = builderForm3()
             .addFormDataPart("storeId",SingletonStores.selectedStore.id.toString())
             .addFormDataPart("search",search)
@@ -138,12 +152,14 @@ class SearchActivity : ComponentActivity() {
 
         requestServer.request2(body, "search", { code, fail ->
             stateController.errorStateAUD(fail)
+            isLoading = false
         }
         ) { data ->
             productViews =
                 MyJson.IgnoreUnknownKeys.decodeFromString(
                     data
                 )
+            isLoading = false
 //            stateController.successStateAUD()
         }
     }

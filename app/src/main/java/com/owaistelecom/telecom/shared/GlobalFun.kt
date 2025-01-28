@@ -11,6 +11,7 @@ import android.os.Vibrator
 import android.text.Editable
 import android.text.InputType
 import android.text.TextWatcher
+import android.util.Log
 import android.view.ViewGroup
 import android.widget.EditText
 import android.widget.Toast
@@ -388,9 +389,36 @@ fun CustomIcon(imageVector: ImageVector,
                 RoundedCornerShape(
                     16.dp
                 )
-            )else Modifier
+            )
+        else Modifier
         Icon(
-
+            modifier = modifierIcon,
+            imageVector = imageVector,
+            contentDescription = ""
+        )
+    }
+}
+@Composable
+fun CustomIcon2(imageVector: ImageVector,
+               modifierIcon: Modifier = Modifier,
+               border:Boolean=false,
+               onClick: () -> Unit) {
+    IconButton(onClick = onClick) {
+        val modifier = if (border) Modifier
+            .border(
+                1.dp,
+                MaterialTheme.colorScheme.primary,
+                RoundedCornerShape(
+                    8.dp
+                )
+            )
+            .clip(
+                RoundedCornerShape(
+                    8.dp
+                )
+            )
+        else Modifier
+        Icon(
             modifier = modifierIcon,
             imageVector = imageVector,
             contentDescription = ""
@@ -588,6 +616,10 @@ fun formatNumber(number: Int): String {
 
 object SingletonRemoteConfig{
     lateinit var remoteConfig: VarRemoteConfig
+    fun getUserLogo(logo:String): String {
+        Log.e("rrrr",remoteConfig.BASE_IMAGE_URL + remoteConfig.SUB_FOLDER_USERS_LOGOS + logo)
+        return remoteConfig.BASE_IMAGE_URL + remoteConfig.SUB_FOLDER_USERS_LOGOS + logo
+    }
 }
 
 fun formatPrice(price: String): String {

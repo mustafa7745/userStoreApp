@@ -21,6 +21,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.outlined.Phone
 import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
@@ -44,7 +45,9 @@ import com.google.firebase.ktx.Firebase
 import com.google.firebase.messaging.FirebaseMessaging
 import com.google.firebase.messaging.ktx.messaging
 import com.owaistelecom.telecom.shared.CustomCard
+import com.owaistelecom.telecom.shared.CustomIcon
 import com.owaistelecom.telecom.shared.CustomRow
+import com.owaistelecom.telecom.shared.CustomRow2
 import com.owaistelecom.telecom.shared.MainCompose1
 import com.owaistelecom.telecom.shared.MyJson
 import com.owaistelecom.telecom.shared.RequestServer
@@ -76,6 +79,22 @@ class OrdersActivity : ComponentActivity() {
                     }
 
                 ) {
+                    CustomCard(modifierBox = Modifier) {
+                        CustomRow2 {
+                            CustomIcon(Icons.AutoMirrored.Default.ArrowBack, border = true) {
+//                                backHandler()
+                            }
+                            Row {
+                                Text("طلباتي")
+//                                if (page != pages.first()){
+//                                    Text(" | ")
+//                                    Text(page.pageName)
+//                                }
+                            }
+
+                        }
+                    }
+
                     LazyColumn(
                         modifier = Modifier
                             .fillMaxSize()

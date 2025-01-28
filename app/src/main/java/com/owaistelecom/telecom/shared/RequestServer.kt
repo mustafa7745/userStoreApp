@@ -156,7 +156,11 @@ class RequestServer(private val activity: ComponentActivity) {
                         is ConnectException -> "Failed to connect to server"
                         else -> e.message ?: "Unknown error occurred"
                     }
-                    onFail(0, "Request failed: $errorMessage")
+                    initVarConfig({
+                        onFail(0, "Not Updated Request failed: $errorMessage")
+                    }){
+                        onFail(0, "Updated Request failed: $errorMessage")
+                    }
                 } finally {
                     okHttpClient.connectionPool.evictAll()
                 }
@@ -176,12 +180,14 @@ class RequestServer(private val activity: ComponentActivity) {
                     val TYPE = ""
                     val SUB_FOLDER_STORE_LOGOS = remoteConfig.getString("SUB_FOLDER_STORE_LOGOS")
                     val SUB_FOLDER_STORE_COVERS = remoteConfig.getString("SUB_FOLDER_STORE_COVERS")
+                    val SUB_FOLDER_USERS_LOGOS = remoteConfig.getString("SUB_FOLDER_USERS_LOGOS")
                     val varRemoteConfig = VarRemoteConfig(
                         BASE_URL = BASE_URL,
                         BASE_IMAGE_URL = BASE_IMAGE_URL,
                         SUB_FOLDER_PRODUCT = SUB_FOLDER_PRODUCT, TYPE = TYPE,
                         SUB_FOLDER_STORE_LOGOS = SUB_FOLDER_STORE_LOGOS,
-                        SUB_FOLDER_STORE_COVERS = SUB_FOLDER_STORE_COVERS
+                        SUB_FOLDER_STORE_COVERS = SUB_FOLDER_STORE_COVERS,
+                        SUB_FOLDER_USERS_LOGOS = SUB_FOLDER_USERS_LOGOS
                     )
                     serverConfig.setRemoteConfig(MyJson.IgnoreUnknownKeys.encodeToString(varRemoteConfig))
 //                    remoteConfigInRequest = SingletonRemoteConfig.remoteConfig
