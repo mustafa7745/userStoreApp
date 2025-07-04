@@ -1,5 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <style name="Theme.OwaisTelecom" parent="android:Theme.Material.Light.NoActionBar" />
+    <!-- Theme with Dark icons for light background -->
+<!--    <style name="AppTheme.Light" parent="Theme.AppCompat.Light.DarkActionBar">-->
+<!--      -->
+<!--    </style>-->
+
+    <style name="Theme.OwaisTelecom" parent="android:Theme.Material.Light.NoActionBar">
+        <item name="android:statusBarColor">@android:color/white</item> <!-- Status bar background color -->
+        <item name="android:windowLightStatusBar">true</item> <!-- Light text/icons (dark color) -->
+    </style>
 </resources>

@@ -2,6 +2,7 @@ package com.owaistelecom.telecom.ui.theme
 
 import android.app.Activity
 import android.os.Build
+import android.view.View
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.darkColorScheme
@@ -44,6 +45,7 @@ private val LightColorScheme = lightColorScheme(
 )
 
 var darkTheme by mutableStateOf(ThemeStorage().isDarkMode())
+//var darkTheme by mutableStateOf(ThemeStorage().isDarkMode())
 
 
 @Composable
@@ -62,17 +64,19 @@ fun OwaisTelecomTheme(
         else -> LightColorScheme
     }
 
-//    val view = LocalView.current
+    val view = LocalView.current
 //    if (!view.isInEditMode) {
-//        SideEffect {
-//            val window = (view.context as Activity).window
-//            window.statusBarColor = colorScheme.primary.toArgb()
+        SideEffect {
+            val window = (view.context as Activity).window
+            window.statusBarColor = Color.White.toArgb()
+            window.decorView.systemUiVisibility = View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR
+//            window.c
 //            WindowCompat.getInsetsController(window, view).isAppearanceLightStatusBars = darkTheme
-//        }
+        }
 //    }
 
     MaterialTheme(
-        colorScheme = colorScheme,
+        colorScheme = LightColorScheme,
         typography = Typography,
         content = content
     )

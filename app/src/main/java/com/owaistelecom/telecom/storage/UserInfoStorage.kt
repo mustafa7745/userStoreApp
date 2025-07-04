@@ -1,6 +1,5 @@
 package com.owaistelecom.telecom.storage
 
-import GetStorage
 import com.owaistelecom.telecom.shared.getCurrentDate
 import com.owaistelecom.telecom.models.UserInfo
 import com.owaistelecom.telecom.shared.MyJson

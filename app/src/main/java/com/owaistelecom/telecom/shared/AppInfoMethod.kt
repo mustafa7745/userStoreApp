@@ -11,9 +11,10 @@ import com.google.firebase.messaging.FirebaseMessaging
 import kotlinx.coroutines.tasks.await
 import java.security.MessageDigest
 import java.security.NoSuchAlgorithmException
+import javax.inject.Inject
 
 
-class AppInfoMethod {
+class AppInfoMethod @Inject constructor() {
 
     @SuppressLint("HardwareIds")
     fun getDeviceId(): String? {
@@ -100,35 +101,3 @@ class AppInfoMethod {
         }
     }
 }
-//class TokenVM: ViewModel(){
-//    fun check(onFail:()->Unit,onSuccess:()->Unit){
-//        GlobalScope.launch {
-//            val s= isGetToken()
-//            if (s){
-//                onSuccess()
-//            }
-//            else{
-//              onFail()
-//            }
-//        }
-//    }
-//   private suspend fun isGetToken():Boolean{
-//        val token = getToken()
-//        if (token){
-//            return true
-//        }
-//        return false
-//    }
-//    private suspend fun getToken():Boolean{
-//        try {
-//            val res =  FirebaseMessaging.getInstance().token.await()
-//            if (res !=null) {
-//                return true
-//            }
-//            return false
-//        }
-//        catch (e:Exception){
-//            return false
-//        }
-//    }
-//}

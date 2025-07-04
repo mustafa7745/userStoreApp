@@ -7,6 +7,25 @@
   "client": [
     {
       "client_info": {
+        "mobilesdk_app_id": "1:172246336379:android:c7808fd7978d85568473de",
+        "android_client_info": {
+          "package_name": "com.fekraplatform.delivery"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCYcgmFYqOYmr5MJc9z_nOXNx8l5wNDpbA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
         "mobilesdk_app_id": "1:172246336379:android:4d827f76daa277e48473de",
         "android_client_info": {
           "package_name": "com.fekraplatform.storemanger"

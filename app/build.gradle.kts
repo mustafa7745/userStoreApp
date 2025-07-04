@@ -4,18 +4,20 @@ plugins {
     id("com.google.gms.google-services")
     id("org.jetbrains.kotlin.plugin.compose")
     kotlin("plugin.serialization") version "1.8.10"
+    id("com.google.devtools.ksp")
+    id("com.google.dagger.hilt.android")
 }
 
 android {
     namespace = "com.owaistelecom.telecom"
-    compileSdk = 34
+    compileSdk = 35
 
     defaultConfig {
         applicationId = "com.owaistelecom.telecom"
         minSdk = 23
-        targetSdk = 34
-        versionCode = 4
-        versionName = "1.0"
+        targetSdk = 35
+        versionCode = 8
+        versionName = "1.3"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
@@ -62,22 +64,28 @@ dependencies {
     implementation("androidx.compose.ui:ui")
     implementation("androidx.compose.ui:ui-graphics")
     implementation("androidx.compose.material3:material3")
-    implementation(platform("com.google.firebase:firebase-bom:32.8.1"))
+    implementation(platform("com.google.firebase:firebase-bom:33.13.0"))
     implementation("com.google.firebase:firebase-analytics")
-    implementation("com.google.firebase:firebase-messaging-ktx:23.4.1")
+    implementation("com.google.firebase:firebase-messaging-ktx:24.1.1")
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.5.1")
 //    implementation("io.coil-kt.coil3:coil-compose:3.0.4")
     implementation("io.coil-kt:coil-compose:2.4.0")
     implementation ("io.coil-kt:coil-svg:2.4.0")
     implementation("com.google.firebase:firebase-config")
     implementation("com.google.android.gms:play-services-location:21.3.0")
+    implementation("com.google.android.libraries.identity.googleid:googleid:1.1.1")
     coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.0.4")
 
 //    implementation("com.google.android.libraries.places:4.1.0")
     implementation("com.google.android.gms:play-services-maps:19.0.0")
     implementation("com.google.maps.android:maps-compose:6.2.0")
+    implementation ("com.pierfrancescosoffritti.androidyoutubeplayer:core:12.1.0")
 
 
+
+    implementation("com.google.android.gms:play-services-auth:21.3.0")
+    implementation("androidx.credentials:credentials:1.5.0")
+    implementation("androidx.credentials:credentials-play-services-auth:1.5.0")
 
 //    implementation(libs.play.services.location)
 //    implementation(libs.audience.network.sdk)
@@ -90,4 +98,11 @@ dependencies {
 //    implementation("com.google.android.play:app-update:2.1.0")
 //    implementation("com.google.android.play:review:2.0.1")
 //    implementation("com.google.android.play:review-ktx:2.0.1")
+
+    implementation ("com.google.dagger:hilt-android:2.56.2")
+    ksp ("com.google.dagger:hilt-compiler:2.56.2")
+    implementation ("androidx.hilt:hilt-navigation-compose:1.2.0")
+    implementation("androidx.security:security-crypto:1.1.0-beta01")
+    implementation("androidx.datastore:datastore-preferences:1.1.7")
+    implementation("com.google.crypto.tink:tink-android:1.8.0")
 }

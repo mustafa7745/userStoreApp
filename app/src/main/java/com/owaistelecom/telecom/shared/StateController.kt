@@ -72,7 +72,5 @@ class StateController {
             message.value = ""
 
         }
-
-//        message.value = ""
     }
 }
