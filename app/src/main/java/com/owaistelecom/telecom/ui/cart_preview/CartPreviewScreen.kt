@@ -2,10 +2,8 @@ package com.owaistelecom.telecom.ui.cart_preview
 
 import android.app.Activity
 import android.content.Intent
-import android.net.Uri
 import android.util.Log
 import androidx.activity.ComponentActivity
-import androidx.activity.compose.BackHandler
 import androidx.activity.compose.ManagedActivityResultLauncher
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.ActivityResult
@@ -23,103 +21,73 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.LazyListScope
-import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.itemsIndexed
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
-import androidx.compose.foundation.pager.HorizontalPager
-import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.Info
-import androidx.compose.material.icons.filled.Search
-import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.outlined.CheckCircle
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Divider
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
-import androidx.compose.material3.carousel.HorizontalMultiBrowseCarousel
-import androidx.compose.material3.carousel.rememberCarouselState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
-import com.owaistelecom.telecom.models.OrderAmount
-import com.owaistelecom.telecom.shared.ADControll
-import com.owaistelecom.telecom.shared.AToken
+import com.owaistelecom.telecom.shared.ADControll2
 import com.owaistelecom.telecom.shared.CustomCard
-import com.owaistelecom.telecom.shared.CustomCircleBox
-import com.owaistelecom.telecom.shared.CustomIcon
-import com.owaistelecom.telecom.shared.CustomIcon3
 import com.owaistelecom.telecom.shared.CustomImageView
-import com.owaistelecom.telecom.shared.CustomImageView1
-import com.owaistelecom.telecom.shared.CustomImageViewUri
-import com.owaistelecom.telecom.shared.HeaderUI2
-import com.owaistelecom.telecom.shared.HeaderUI3
 import com.owaistelecom.telecom.shared.MainComposeAUD
 import com.owaistelecom.telecom.shared.MyJson
 import com.owaistelecom.telecom.shared.MyTextField
 import com.owaistelecom.telecom.shared.formatPrice
-import com.owaistelecom.telecom.shared.isStoreOpen
 import com.owaistelecom.telecom.ui.add_location.AddLocationActivity
-import com.owaistelecom.telecom.ui.add_to_cart.CartProduct
-import com.owaistelecom.telecom.ui.login.LoginViewModel
+import com.owaistelecom.telecom.ui.add_to_cart2.CartProduct2
 import com.owaistelecom.telecom.ui.login.goToDashboard
 import com.owaistelecom.telecom.ui.theme.OwaisTelecomTheme
-import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
-import kotlinx.serialization.json.encodeToJsonElement
 
 @Composable
 fun CartPreviewScreen(componentActivity: ComponentActivity,onAddLocation:()->Unit){
@@ -151,8 +119,8 @@ fun CartPreviewScreen(componentActivity: ComponentActivity,onAddLocation:()->Uni
            } else
                viewModel.cartView = true
        }){
-            if (!viewModel.cartView)
-                PulsingBoxConfirm(componentActivity)
+//            if (!viewModel.cartView)
+//                PulsingBoxConfirm(componentActivity)
             if (viewModel.cartView) {
 
                 MainContentCartPreview()
@@ -162,6 +130,7 @@ fun CartPreviewScreen(componentActivity: ComponentActivity,onAddLocation:()->Uni
                 if (viewModel.isShowReadLocations) modalShowLocations(launcher,componentActivity)
                 if (viewModel.isShowSelectPaymentMethod) ChoosePaymentMethod()
                 if (viewModel.isShowShowPaymentTypes) ChoosePaymentTypes()
+                if (viewModel.isShowChooseCouponCode) ChooseCouponCode()
             }
         }
     }
@@ -217,7 +186,11 @@ private fun MainContentCartPreview() {
                                     modifier = Modifier
                                         .size(60.dp)
                                         .clip(RoundedCornerShape(12.dp))
-                                        .border(1.dp, MaterialTheme.colorScheme.primary, RoundedCornerShape(12.dp)),
+                                        .border(
+                                            1.dp,
+                                            MaterialTheme.colorScheme.primary,
+                                            RoundedCornerShape(12.dp)
+                                        ),
                                     imageUrl = viewModel.getRemoteConfig().BASE_IMAGE_URL +
                                             viewModel.getRemoteConfig().SUB_FOLDER_STORE_LOGOS +
                                             viewModel.getSelectedStore().logo,
@@ -247,7 +220,7 @@ private fun MainContentCartPreview() {
                 }
 
 
-                itemsIndexed(viewModel.getAllCartProducts()) { index: Int, cartProduct: CartProduct ->
+                itemsIndexed(viewModel.getAllCartProducts()) { index: Int, cartProduct: CartProduct2 ->
 
                     Card (
                         Modifier
@@ -268,7 +241,7 @@ private fun MainContentCartPreview() {
                             ) {
                                 Column {
                                     Text(
-                                        text = cartProduct.product.productName,
+                                        text = cartProduct.product.name,
                                         style = MaterialTheme.typography.titleMedium,
                                         fontWeight = FontWeight.Bold
                                     )
@@ -279,19 +252,19 @@ private fun MainContentCartPreview() {
                                     )
                                 }
 
-                                if (cartProduct.product.images.isNotEmpty()) {
-                                    CustomImageView(
-                                        modifier = Modifier
-                                            .size(60.dp)
-                                            .clip(RoundedCornerShape(12.dp))
-//                                                .border(1.dp, MaterialTheme.colorScheme.primary, RoundedCornerShape(12.dp)
-//                                                )
-                                        ,
-                                        imageUrl = viewModel.getRemoteConfig().BASE_IMAGE_URL +
-                                                viewModel.getRemoteConfig().SUB_FOLDER_PRODUCT +
-                                                cartProduct.product.images.first().image,
-                                    )
-                                }
+//                                if (cartProduct.product.images.isNotEmpty()) {
+//                                    CustomImageView(
+//                                        modifier = Modifier
+//                                            .size(60.dp)
+//                                            .clip(RoundedCornerShape(12.dp))
+////                                                .border(1.dp, MaterialTheme.colorScheme.primary, RoundedCornerShape(12.dp)
+////                                                )
+//                                        ,
+//                                        imageUrl = viewModel.getRemoteConfig().BASE_IMAGE_URL +
+//                                                viewModel.getRemoteConfig().SUB_FOLDER_PRODUCT +
+//                                                cartProduct.product.images.first().image,
+//                                    )
+//                                }
                             }
 
                             Spacer(modifier = Modifier.height(8.dp))
@@ -305,21 +278,23 @@ private fun MainContentCartPreview() {
                                     verticalAlignment = Alignment.CenterVertically,
                                     horizontalArrangement = Arrangement.SpaceBetween
                                 ) {
+                                    val currencyName = viewModel.appSession.home.storeCurrencies
+                                        .firstOrNull { it.currencyId == option.option.currencyId }
+                                        ?.currencyName ?: ""
                                     Column {
                                         Text(
-                                            text = option.productOption.name,
+                                            text = option.option.name,
                                             style = MaterialTheme.typography.bodyMedium
                                         )
                                         Text(
-                                            text = "${formatPrice(option.productOption.price)} ${option.productOption.currency.name}",
+                                            text = "${formatPrice(option.option.price.toString())} ${currencyName} ",
                                             color = MaterialTheme.colorScheme.primary,
                                             fontWeight = FontWeight.Bold
                                         )
                                     }
 
-                                    ADControll(
-                                        cartProduct.product,
-                                        option.productOption
+                                    ADControll2(
+                                        option.option
                                     )
                                 }
                             }
@@ -472,18 +447,21 @@ private fun MainContentOrderPreview() {
                         Text("خيار استلام الطلب", modifier = Modifier.padding(14.dp))
                         viewModel.radioOptions.forEach { text ->
                             Row(
-                                Modifier.fillMaxWidth().height(56.dp)
+                                Modifier
+                                    .fillMaxWidth()
+                                    .height(56.dp)
                                     .selectable(
                                         selected = (text == viewModel.selectedOption),
                                         onClick = {
-                                            if (viewModel.selectedOption.id == 2 ){
+                                            if (viewModel.selectedOption.id == 2) {
                                                 viewModel.selectedLocation = null
                                             }
                                             viewModel.onOptionSelected(text)
 
                                         },
                                         role = Role.RadioButton
-                                    ).padding(horizontal = 16.dp),
+                                    )
+                                    .padding(horizontal = 16.dp),
                                 verticalAlignment = Alignment.CenterVertically
                             )
                             {
@@ -659,7 +637,9 @@ private fun modalShowLocations(launcher: ManagedActivityResultLauncher<Intent, A
             ) {
                 item {
                     Button(
-                        modifier = Modifier.fillMaxSize().padding(8.dp),
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(8.dp),
                         onClick = {
                             val intent = Intent(
                                 context,
@@ -699,73 +679,259 @@ private fun modalShowLocations(launcher: ManagedActivityResultLauncher<Intent, A
 
 // controller
 
-
 @Composable
 fun OrderInvoiceSection() {
     val viewModel: CartPreviewViewModel = hiltViewModel()
+    val context = LocalContext.current
+    val scope = rememberCoroutineScope()
+
     val cartProducts = viewModel.getAllCartProducts()
     val delivery = viewModel.selectedLocation?.deliveryPrice
     val cartTotal = viewModel.getAllCartProductsSum()
-    val grandTotal = viewModel.getAllCartProductsSum()
+    val grandTotal = viewModel.getAllCartProductsSumPrices()
+    val coupon = viewModel.coupon
 
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 12.dp, vertical = 8.dp)
-            .clip(RoundedCornerShape(12.dp))
-            .background(Color(0xFFF9F9F9)) // لون خلفية خفيف وأنيق
-            .border(1.dp, Color(0xFFE0E0E0), RoundedCornerShape(12.dp))
+            .padding(horizontal = 16.dp, vertical = 8.dp)
+            .clip(RoundedCornerShape(16.dp))
             .padding(16.dp)
     ) {
-        Row (Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.SpaceBetween){
-            Text(
-                text = "🧾 فاتورة الطلب",
-                fontWeight = FontWeight.SemiBold,
-                fontSize = 16.sp,
-                color = Color(0xFF333333)
-            )
-        }
-        // عنوان
 
+        Text(
+            text = "🧾 ملخص الفاتورة",
+            fontWeight = FontWeight.Bold,
+            fontSize = 18.sp,
+            color = Color(0xFF1B5E20),
+            modifier = Modifier.padding(bottom = 8.dp)
+        )
 
-        Spacer(modifier = Modifier.height(8.dp))
         Divider(color = Color(0xFFE0E0E0))
 
         if (cartProducts.isNotEmpty()) {
 
-            InvoiceRow(title = "إجمالي الطلبات", value = cartTotal)
+            Spacer(modifier = Modifier.height(12.dp))
+            InvoiceRow(title = "🛍 إجمالي المنتجات", value = cartTotal)
 
-            if (delivery != null) {
+            if (viewModel.appSession.selectedStore.hasCoupon == 1) {
+                Spacer(modifier = Modifier.height(6.dp))
+
+                if (coupon == null) {
+                    Text(
+                        text = "🎟 هل لديك كوبون خصم؟",
+                        fontSize = 13.sp,
+                        color = Color(0xFF1976D2),
+                        fontWeight = FontWeight.Medium,
+                        modifier = Modifier
+                            .clickable { viewModel.isShowChooseCouponCode = true }
+                            .padding(vertical = 4.dp)
+                    )
+                } else {
+                    val discountValueText = if (coupon.type == 1) {
+                        "${coupon.amount}%"
+                    } else {
+                        val currencyName = viewModel.appSession.home.storeCurrencies.find {
+                            it.currencyId == coupon.currencyId
+                        }?.currencyName ?: ""
+                        "${coupon.amount} $currencyName"
+                    }
+
+                    InvoiceRow(title = "💸 الخصم", value = "- $discountValueText", valueColor = Color(0xFFD32F2F))
+                }
+            }
+
+            delivery?.let {
+                Spacer(modifier = Modifier.height(6.dp))
                 InvoiceRow(
-                    title = "سعر التوصيل",
-                    value = "${formatPrice(delivery.deliveryPrice.toString())} ${delivery.currencyName}"
+                    title = "🚚 التوصيل",
+                    value = "${formatPrice(it.deliveryPrice.toString())} ${it.currencyName}"
                 )
             }
 
             Divider(
-                color = Color(0xFFE0E0E0),
-                modifier = Modifier.padding(vertical = 8.dp)
+                color = Color(0xFFBDBDBD),
+                thickness = 1.dp,
+                modifier = Modifier.padding(vertical = 12.dp)
             )
 
             InvoiceRow(
-                title = "المبلغ المتوجب دفعه",
+                title = "💰 المبلغ النهائي",
                 value = grandTotal,
                 titleColor = Color.Black,
                 valueColor = Color(0xFF2E7D32),
                 isBold = true
             )
 
+            Spacer(modifier = Modifier.height(16.dp))
+
+            Button(
+                onClick = {
+                        if (!viewModel.getIsOpen()) {
+                            viewModel.stateController.showMessage("المتجر مغلق حالياً")
+                            return@Button
+                        }
+
+//                        // التحقق من الحد الأدنى للسعر
+//                        val lessPriceError = viewModel.getLessCartPriceError()
+//                        if (lessPriceError != null) {
+//                            viewModel.stateController.showMessage(lessPriceError)
+//                            return@Button
+//                        }
+
+                        // التحقق من خيار التوصيل أو الحضور
+                        if (viewModel.selectedOption.id == 1) {
+                            // التوصيل
+                            if (viewModel.selectedLocation == null) {
+                                viewModel.ShowLocations()
+                                viewModel.stateController.showMessage("يجب تحديد موقع للتوصيل")
+                                return@Button
+                            }
+                        }
+
+                        // التحقق من الدفع
+                        if (viewModel.selectedPaymentMethod == null) {
+                            viewModel.isShowSelectPaymentMethod = true
+                            viewModel.stateController.showMessage("يجب تحديد طريقة الدفع")
+                            return@Button
+                        }
+
+//                    (context as Activity).finish()
+
+                        // تأكيد الطلب
+                        scope.launch {
+                            viewModel.confirmOrder {
+                                viewModel.emptyCartProducts(viewModel.appSession.selectedStore.id)
+
+                                (context as Activity).finish()
+                            }
+                        }
+                },
+                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF43A047)),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(48.dp)
+                    .clip(RoundedCornerShape(12.dp))
+            ) {
+                Icon(Icons.Default.Check, contentDescription = null, tint = Color.White)
+                Spacer(modifier = Modifier.width(8.dp))
+                Text(
+                    text = "تأكيد الطلب",
+                    color = Color.White,
+                    fontWeight = FontWeight.Bold
+                )
+            }
         } else {
+            Spacer(modifier = Modifier.height(12.dp))
             Text(
                 text = "لا توجد منتجات في السلة.",
                 color = Color.Gray,
                 fontSize = 13.sp,
-                fontStyle = FontStyle.Italic,
-                modifier = Modifier.padding(top = 6.dp)
+                fontStyle = FontStyle.Italic
             )
         }
     }
 }
+
+
+
+//
+//@Composable
+//fun OrderInvoiceSection() {
+//    val viewModel: CartPreviewViewModel = hiltViewModel()
+//    val cartProducts = viewModel.getAllCartProducts()
+//    val delivery = viewModel.selectedLocation?.deliveryPrice
+//    val cartTotal = viewModel.getAllCartProductsSum()
+//    val grandTotal = viewModel.getAllCartProductsSumPrices()
+//
+//    Column(
+//        modifier = Modifier
+//            .fillMaxWidth()
+//            .padding(horizontal = 12.dp, vertical = 8.dp)
+//            .clip(RoundedCornerShape(12.dp))
+//            .background(Color(0xFFF9F9F9)) // لون خلفية خفيف وأنيق
+//            .border(1.dp, Color(0xFFE0E0E0), RoundedCornerShape(12.dp))
+//            .padding(16.dp)
+//    ) {
+//        Button(onClick = {}) { Text("تأكيد الطلب")}
+//        Row (Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.SpaceBetween){
+//            Text(
+//                text = "🧾 فاتورة الطلب",
+//                fontWeight = FontWeight.SemiBold,
+//                fontSize = 16.sp,
+//                color = Color(0xFF333333)
+//            )
+//        }
+//        // عنوان
+//
+//
+//        Spacer(modifier = Modifier.height(8.dp))
+//        Divider(color = Color(0xFFE0E0E0))
+//
+//        if (cartProducts.isNotEmpty()) {
+//
+//            InvoiceRow(title = "إجمالي الطلبات", value = cartTotal)
+//            if (viewModel.appSession.selectedStore.hasCoupon == 1) {
+//                val coupon = viewModel.coupon
+//                if (coupon == null) {
+//                    Text(
+//                        text = "هل لديك كوبون خصم؟",
+//                        fontSize = 10.sp,
+//                        color = Color.Blue,
+//                        modifier = Modifier.clickable {
+//                            viewModel.isShowChooseCouponCode = true
+//                        }
+//                    )
+//                } else {
+//                    val discountValueText = if (coupon.type == 1) {
+//                        "${coupon.amount}%"
+//                    } else {
+//                        val currencyName = viewModel.appSession.home.storeCurrencies.find { it.currencyId == coupon.currencyId }?.currencyName
+//                        "${coupon.amount} ${currencyName ?: ""}" // تأكد أن لديك العملة
+//                    }
+//
+//                    InvoiceRow(
+//                        title = "الخصم",
+//                        value = discountValueText,
+//
+//                        )
+//                }
+//            }
+//
+//            if (delivery != null) {
+////                val currencyName = viewModel.appSession.home.storeCurrencies.find { it.isSelected == 1 }
+//                InvoiceRow(
+//                    title = "سعر التوصيل",
+//                    value = "${formatPrice(delivery.deliveryPrice.toString())} ${delivery.currencyName}"
+//                )
+//            }
+//
+//
+//
+//            Divider(
+//                color = Color(0xFFE0E0E0),
+//                modifier = Modifier.padding(vertical = 8.dp)
+//            )
+//
+//            InvoiceRow(
+//                title = "المبلغ النهائي",
+//                value = grandTotal,
+//                titleColor = Color.Black,
+//                valueColor = Color(0xFF2E7D32),
+//                isBold = true
+//            )
+//
+//        } else {
+//            Text(
+//                text = "لا توجد منتجات في السلة.",
+//                color = Color.Gray,
+//                fontSize = 13.sp,
+//                fontStyle = FontStyle.Italic,
+//                modifier = Modifier.padding(top = 6.dp)
+//            )
+//        }
+//    }
+//}
 @Composable
 fun PulsingBoxConfirm(componentActivity: ComponentActivity) {
     val scope = rememberCoroutineScope()
@@ -784,39 +950,40 @@ fun PulsingBoxConfirm(componentActivity: ComponentActivity) {
     )
 
     Box(
-        modifier = Modifier.fillMaxWidth()
+        modifier = Modifier
+            .fillMaxWidth()
             .graphicsLayer {
                 scaleX = scale
                 scaleY = scale
             }
             .clickable {
                 var stop = false
-                if (!viewModel.getIsOpen()){
+                if (!viewModel.getIsOpen()) {
                     viewModel.stateController.showMessage("المتجر مغلق حاليا")
                     return@clickable
                 }
-                val isHaveLessCartPrice = viewModel.getSelectedStore().storeCurrencies.any { it.lessCartPrice.toDouble() > 0 }
-                if (isHaveLessCartPrice){
-                    val lessCartPrices = viewModel.getSelectedStore().storeCurrencies.filter { it.lessCartPrice.toDouble() > 0 }
-                    val allCartPrices = viewModel.getAllCartProductsSumPrices()
-
-                    lessCartPrices.forEach { data ->
-                        allCartPrices.forEach { orderAmount:OrderAmount ->
-                            if (data.lessCartPrice.toDouble() > orderAmount.amount && data.currencyId == orderAmount.currencyId){
-                                viewModel.stateController.showMessage("اقل مبلغ للطلب يجب ان يستوفي"+ " "+data.lessCartPrice+" "+ orderAmount.currencyName)
-//                               return;
-                                stop = true
-                            }
-                        }
-                    }
-                }
-                if (stop)return@clickable
-                if (viewModel.selectedOption.id == 1){
-                    if (viewModel.selectedLocation != null){
+//                val isHaveLessCartPrice = viewModel.getSelectedStore().storeCurrencies.any { it.lessCartPrice.toDouble() > 0 }
+//                if (isHaveLessCartPrice){
+//                    val lessCartPrices = viewModel.getSelectedStore().storeCurrencies.filter { it.lessCartPrice.toDouble() > 0 }
+//                    val allCartPrices = viewModel.getAllCartProductsSumPrices()
+//
+//                    lessCartPrices.forEach { data ->
+//                        allCartPrices.forEach { orderAmount:OrderAmount ->
+//                            if (data.lessCartPrice.toDouble() > orderAmount.amount && data.currencyId == orderAmount.currencyId){
+//                                viewModel.stateController.showMessage("اقل مبلغ للطلب يجب ان يستوفي"+ " "+data.lessCartPrice+" "+ orderAmount.currencyName)
+////                               return;
+//                                stop = true
+//                            }
+//                        }
+//                    }
+//                }
+                if (stop) return@clickable
+                if (viewModel.selectedOption.id == 1) {
+                    if (viewModel.selectedLocation != null) {
 
                         if (viewModel.selectedPaymentMethod != null) {
                             scope.launch {
-                                viewModel.confirmOrder{
+                                viewModel.confirmOrder {
                                     componentActivity.finish()
                                 }
                             }
@@ -826,17 +993,19 @@ fun PulsingBoxConfirm(componentActivity: ComponentActivity) {
                             viewModel.stateController.showMessage("يجب تحديد طريقة الدفع")
                         }
 
-                    }else {
+                    } else {
                         viewModel.ShowLocations()
                         viewModel.stateController.showMessage("يجب تحديد موقع للتوصيل")
                     }
-                }else{
-                    Log.e("selectedPaymentMethod",viewModel.selectedPaymentMethod.toString())
+                } else {
+                    Log.e("selectedPaymentMethod", viewModel.selectedPaymentMethod.toString())
 //                    viewModel.checkPaymentAndConfirm()
                     if (viewModel.selectedPaymentMethod != null) {
                         scope.launch {
-                            viewModel.confirmOrder{
+                            viewModel.confirmOrder {
+                                viewModel.emptyCartProducts(viewModel.appSession.selectedStore.id)
                                 componentActivity.finish()
+
                             }
                         }
 
@@ -891,7 +1060,7 @@ private fun ChoosePaymentMethod() {
                                     viewModel.isShowShowPaymentTypes = true
 //                                        intentFunWhatsapp()
                                 } else
-                                    viewModel. selectedPaymentMethod = item
+                                    viewModel.selectedPaymentMethod = item
                                 viewModel.isShowSelectPaymentMethod = false
                             },
 //                            colors = CardColors(
@@ -924,6 +1093,7 @@ private fun ChoosePaymentMethod() {
     }
 }
 
+
 @Composable
 @OptIn(ExperimentalMaterial3Api::class)
 private fun ChoosePaymentTypes() {
@@ -950,7 +1120,8 @@ private fun ChoosePaymentTypes() {
                         Modifier
                             .padding(8.dp)
                             .clickable {
-                                viewModel.selectedPaymentMethod = PaymentModel(item.name,item.image,item.id)
+                                viewModel.selectedPaymentMethod =
+                                    PaymentModel(item.name, item.image, item.id)
 //                                    isShowSelectPaymentMethod = false
 
 //                                    if (item.id == 3) {
@@ -982,6 +1153,48 @@ private fun ChoosePaymentTypes() {
                             Text(item.name, fontSize = 12.sp)
                         }
 
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+@OptIn(ExperimentalMaterial3Api::class)
+private fun ChooseCouponCode() {
+    val viewModel: CartPreviewViewModel = hiltViewModel()
+    var code by remember { mutableStateOf("") }
+    ModalBottomSheet(
+        onDismissRequest = { viewModel.isShowChooseCouponCode = false }) {
+        Box(
+            Modifier
+                .fillMaxSize()
+                .padding(bottom = 10.dp)
+        ) {
+            LazyColumn {
+                item {
+                    OutlinedTextField(
+                        modifier = Modifier.fillMaxWidth(),
+                        value = code,
+                        label = {
+                            Text("كود الخصم")
+                        },
+                        onValueChange = {
+                            code = it
+                        }
+                    )
+                }
+                item {
+                    Button(
+                        enabled =code.isNotEmpty(),
+                        onClick = {
+
+                            viewModel.readCoupon(code)
+                        },
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Text( "تأكيد كود الخصم")
                     }
                 }
             }

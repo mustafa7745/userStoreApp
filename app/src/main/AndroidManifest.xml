@@ -43,7 +43,7 @@
             />
         <activity android:name=".ui.general_info.GeneralInfoActivity"/>
         <activity android:name=".ui.profile.ProfileActivity"/>
-        <activity android:name=".ui.add_to_cart.AddToCartActivity"/>
+        <activity android:name=".ui.add_to_cart.AddToCart2Activity"/>
         <activity android:name=".ui.cart_preview.CartPreviewActivity"
             android:windowSoftInputMode="adjustResize"
             />

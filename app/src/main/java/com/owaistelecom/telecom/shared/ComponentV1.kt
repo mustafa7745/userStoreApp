@@ -48,10 +48,9 @@ fun CustomImageView(
                     contentScale = ContentScale.Fit
                 )
             }
-
         },
         loading = {
-            CircularProgressIndicator()
+//            CircularProgressIndicator()
         },
         model = imageUrl,
 //        imageLoader = imageLoader,

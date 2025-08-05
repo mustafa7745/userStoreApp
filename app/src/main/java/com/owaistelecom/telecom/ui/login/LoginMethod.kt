@@ -14,6 +14,9 @@ fun goToDashboard(activity: ComponentActivity) {
     intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP
     activity.startActivity(intent)
     activity.finish()
+//    val intent = Intent(activity, InsideStoreActivity::class.java)
+//    intent.flags = Intent.FLAG_ACTIVITY_SINGLE_TOP
+//    activity.startActivity(intent)
 }
 
 fun intentFunWhatsapp(componentActivity: ComponentActivity, message: String): Boolean {

@@ -21,13 +21,9 @@ import javax.inject.Inject
 class LoginViewModel @Inject constructor(
     private val requestServer: RequestServer2,
     private val builder: FormBuilder,
-    private val aToken: AToken,
-    private val serverConfig: ServerConfig,
-    private val appSession: AppSession
+    private val aToken: AToken
 ) : ViewModel() {
-    fun check(onFail:()->Unit){
-        onFail()
-    }
+
     val stateController = StateController()
     var countryList = listOf<Country>()
     lateinit var selectedCountryCode : Country
@@ -59,6 +55,7 @@ class LoginViewModel @Inject constructor(
     }
 
     var successLogin by mutableStateOf(false)
+
     suspend fun login() {
         stateController.startAud()
         try {
@@ -66,11 +63,7 @@ class LoginViewModel @Inject constructor(
                 .addFormDataPart("countryCode", selectedCountryCode.code)
                 .addFormDataPart("phone", phone)
                 .addFormDataPart("password", password)
-
-            Log.e("UUURRRL","getLoginConfiguration")
             val data = requestServer.request(body, "login",false) as String
-            Log.e("UUURRRL2",data.toString())
-
             aToken.setAccessToken(data)
             successLogin = true
         } catch (e: Exception) {
@@ -78,8 +71,22 @@ class LoginViewModel @Inject constructor(
             stateController.errorStateAUD(e.message.toString())
         }
     }
+    fun signInWithGoogle(idToken:String) {
+        stateController.startAud()
+        viewModelScope.launch {
+            try {
+                val body = builder.sharedBuilderForm()
+                    .addFormDataPart("loginType", "Google")
+                    .addFormDataPart("googleToken", idToken)
 
-    fun signInWithGoogle(idToken:String,onSuccess: ()->Unit) {
+                val data = requestServer.request(body, "login",false)
+                aToken.setAccessToken(data as String)
+                successLogin = true
+            } catch (e: Exception) {
+                Log.e("UUURRRL3",e.message.toString())
+                stateController.errorStateAUD(e.message.toString())
+            }
+        }
 //        viewModelScope.launch {
 //            try {
 //                val body = builder.loginBuilderForm()
@@ -114,90 +121,4 @@ class LoginViewModel @Inject constructor(
              }
 
     }
-//    private fun initApp(onSuccess: () -> Unit){
-//        viewModelScope.launch{
-//            if (!serverConfig.isSetSubscribeApp()){
-//                val appId = "101"
-//                Firebase.messaging.subscribeToTopic(appId)
-//                    .addOnCompleteListener { task ->
-//                        if (task.isSuccessful) {
-//                            viewModelScope.launch{
-//                                serverConfig.setSubscribeApp(appId)
-//                            }
-//
-//                            Log.d("Subscription", "Subscribed to topic: $appId")
-//                        } else {
-//                            Log.w("Subscription", "Subscription failed", task.exception)
-//                        }
-//                    }
-//            }
-//
-//            FirebaseMessaging.getInstance().token.addOnCompleteListener { task ->
-//                if (task.isSuccessful) {
-//                    val token = task.result
-//                    Log.d("FCM Token", "Token: $token")
-//                    viewModelScope.launch{
-//                        if (serverConfig.getAppToken() != token){
-//                            serverConfig.setAppToken(token)
-//                        }
-//                    }
-//                }
-//            }
-//        }
-//    }
-
-
-
-//    suspend fun initApp(){
-//        stateController.startRead()
-//        try {
-//            if (!serverConfig.isSetSubscribeApp()){
-//                val appId = "101"
-//                serverConfig.subscribeToTopicSuspend(appId)
-//            }
-//            else{
-//                Log.e("App Sub Stored ","Done")
-//            }
-//            serverConfig.getFcmTokenSuspend()
-//
-//            if (serverConfig.isSetRemoteConfig()){
-//                Log.e("Remote Config V",appSession.remoteConfig.toString())
-//            }else{
-//                stateController.startRead()
-//                requestServer.initVarConfig1()
-//            }
-//            //
-//            getLoginConfiguration()
-//        }catch (e: CustomException){
-//            Log.e("Custom Error init server conige",e.message.toString())
-//            stateController.errorStateRead(e.message)
-//        }
-//
-//    }
-
-    //Optional
-    private fun initApp2() {
-        viewModelScope.launch {
-            val appId = "101"
-
-            // 1. اشتراك في التوبك إذا لم يتم من قبل
-            if (!serverConfig.isSetSubscribeApp()) {
-                val subscribed = serverConfig.subscribeToTopicSuspend(appId)
-                if (subscribed) {
-                    serverConfig.setSubscribeApp(appId)
-                    Log.d("Subscription", "Subscribed to topic: $appId")
-                } else {
-                    Log.w("Subscription", "Subscription failed")
-                }
-            }
-
-            // 2. جلب FCM Token وتخزينه إذا تغيّر
-            val token = serverConfig.getFcmTokenSuspend()
-            if (token.isNotEmpty() && token != serverConfig.getAppToken()) {
-                serverConfig.setAppToken(token)
-                Log.d("FCM Token", "Token updated: $token")
-            }
-        }
-    }
-
 }

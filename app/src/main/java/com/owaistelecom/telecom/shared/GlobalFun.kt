@@ -1,19 +1,15 @@
 package com.owaistelecom.telecom.shared
 
 
-import android.app.Activity
 import android.content.Context
 import android.content.Intent
-import android.location.Location
 import android.media.AudioManager
-import android.os.Build
 import android.text.Editable
 import android.text.TextWatcher
-import android.util.Log
 import android.view.ViewGroup
 import android.widget.EditText
-import android.widget.ImageButton
 import android.widget.Toast
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -25,7 +21,7 @@ import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -35,11 +31,8 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.ShoppingCart
-import androidx.compose.material.icons.outlined.Add
-import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -50,7 +43,6 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -70,25 +62,18 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.compose.ui.window.Dialog
-import androidx.core.content.ContextCompat
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
 import coil.compose.SubcomposeAsyncImage
-import com.google.firebase.ktx.Firebase
-import com.google.firebase.remoteconfig.FirebaseRemoteConfig
-import com.google.firebase.remoteconfig.ktx.remoteConfig
-import com.google.firebase.remoteconfig.ktx.remoteConfigSettings
 import com.owaistelecom.telecom.R
 import com.owaistelecom.telecom.Singlton.AppSession
 import com.owaistelecom.telecom.application.MyApplication
 import com.owaistelecom.telecom.models.Product
 import com.owaistelecom.telecom.models.ProductOption
-import com.owaistelecom.telecom.models.Store
+import com.owaistelecom.telecom.models.StoreProduct1
 import com.owaistelecom.telecom.models.StoreTime
-import com.owaistelecom.telecom.ui.add_to_cart.CartRepository
-import com.owaistelecom.telecom.ui.add_to_cart.CartViewModel
-import okhttp3.MultipartBody
-import okhttp3.OkHttpClient
+import com.owaistelecom.telecom.ui.add_to_cart2.Cart2ViewModel
+import com.owaistelecom.telecom.ui.add_to_cart2.CartViewModel
 import java.text.DecimalFormat
 import java.text.DecimalFormatSymbols
 import java.time.DayOfWeek
@@ -430,16 +415,6 @@ fun CustomImageViewUri(
     )
 }
 
-fun getRemoteConfig(): FirebaseRemoteConfig {
-    val remoteConfig: FirebaseRemoteConfig = Firebase.remoteConfig
-    val configSettings = remoteConfigSettings {
-        minimumFetchIntervalInSeconds = 3600
-    }
-    remoteConfig.setConfigSettingsAsync(configSettings)
-    return remoteConfig;
-}
-
-
 fun getCurrentDate(): LocalDateTime {
     return LocalDateTime.now()
 }
@@ -528,7 +503,7 @@ fun CustomIcon2(imageVector: ImageVector,
 
 @Composable
 fun ADControll(product: Product, option: ProductOption) {
-    val viewModel:CartViewModel = hiltViewModel()
+    val viewModel: CartViewModel = hiltViewModel()
     val count = viewModel.getCountOptionProduct(product, option)
     
     Row(
@@ -578,6 +553,7 @@ fun ADControll(product: Product, option: ProductOption) {
                 )
                 .clickable {
                     playClickSound()
+
                     viewModel.addProductToCart(product, option)
                 },
             contentAlignment = Alignment.Center
@@ -590,6 +566,81 @@ fun ADControll(product: Product, option: ProductOption) {
             )
         }
     }
+}
+
+@Composable
+fun ADControll2(storeProduct1: StoreProduct1) {
+    val viewModel: Cart2ViewModel = hiltViewModel()
+    val storeNestedSectionId = viewModel.appSession.selectedStoreNestedSection?.id
+    val homeProduct= viewModel.appSession.homeProducts[storeNestedSectionId] ?: return
+    val product = homeProduct.products.find { it.id == storeProduct1.productId }
+    if (product != null){
+        val count = viewModel.getCountOptionProduct(product, storeProduct1)
+
+        Row(
+            modifier = Modifier
+                .padding(4.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.Center
+        ) {
+            // زر الطرح
+            Box(
+                modifier = Modifier
+                    .size(32.dp)
+                    .background(
+                     MaterialTheme.colorScheme.primary,
+                        CircleShape
+                    )
+                    .clickable(enabled = count > 0) {
+                        playClickSound()
+                        viewModel.decrement( product, storeProduct1)
+                    },
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    painter = painterResource(id = R.drawable.decrement),
+                    contentDescription = "Remove",
+                    tint =  Color.White,
+                    modifier = Modifier.size(16.dp)
+                )
+            }
+
+            // عرض الكمية
+            Text(
+                text = count.toString(),
+                fontSize = 14.sp,
+                fontWeight = FontWeight.Medium,
+                color = MaterialTheme.colorScheme.primary,
+                modifier = Modifier.padding(horizontal = 8.dp)
+            )
+
+            // زر الإضافة
+            Box(
+                modifier = Modifier
+                    .size(32.dp)
+                    .background(
+                        MaterialTheme.colorScheme.primary,
+                        CircleShape
+                    )
+                    .clickable {
+                        playClickSound()
+
+                        viewModel.addProductToCart(product, storeProduct1)
+                    },
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Add,
+                    contentDescription = "Add",
+                    tint = Color.White,
+                    modifier = Modifier.size(16.dp)
+                )
+            }
+        }
+    }
+
+
+
 }
 // Function to play the default click sound
 private fun playClickSound() {
@@ -756,111 +807,223 @@ fun CustomCircleBox(isFilled: Boolean, color: Color, size: Dp) {
 @Composable
 fun GoToCartUI() {
     val viewModel: CartViewModel = hiltViewModel()
-    if (viewModel.isCartEmpty())
-        return
-//    TextButton(onClick = {
-//        val intent =
-//            Intent(context, CartPreviewActivity::class.java)
-//        context.startActivity(intent)
-//    }) {
     val context = LocalContext.current
-        Row (Modifier .background(Color.White, shape = CircleShape).clickable {
-            val intent = Intent(context, com.owaistelecom.telecom.ui.cart_preview.CartPreviewActivity::class.java)
-            context.startActivity(intent)
-        },
 
-            ) {
-            // أيقونة ✅ داخل دائرة بيضاء
+    viewModel
+    // عدد المنتجات في السلة
+    val cartCount = viewModel.getCartProducts().size // <-- تأكد أنك تملك هذه الدالة في ViewModel
+
+    if (cartCount == 0) return
+
+    Row(
+        modifier = Modifier
+            .clip(RoundedCornerShape(50))
+            .background(Color.White)
+            .clickable {
+                val intent = Intent(context, com.owaistelecom.telecom.ui.cart_preview.CartPreviewActivity::class.java)
+                context.startActivity(intent)
+            }
+            .padding(horizontal = 12.dp, vertical = 8.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        // 🛒 أيقونة السلة + شارة العدد
+        Box(
+            modifier = Modifier
+                .size(28.dp),
+            contentAlignment = Alignment.Center
+        ) {
+            // دائرة خلفية خضراء ناعمة
             Box(
                 modifier = Modifier
-                    .size(25.dp)
-                    .background(Color.White, shape = CircleShape),
+                    .size(28.dp)
+                    .background(Color(0xFFE8F5E9), shape = CircleShape),
                 contentAlignment = Alignment.Center
             ) {
                 Icon(
                     imageVector = Icons.Default.ShoppingCart,
-                    contentDescription = null,
-                    tint = Color(0xFF4CAF50), // أخضر واضح
-                    modifier = Modifier.size(20.dp)
+                    contentDescription = "Cart",
+                    tint = Color(0xFF4CAF50),
+                    modifier = Modifier.size(18.dp)
                 )
             }
 
-
-            // النص: توصيل مجاني
-
-
-            Text(
-                text = "عرض السلة",
-                color = Color(0xFF2E7D32), // أخضر غامق
-                fontSize = 12.sp,
-                fontWeight = FontWeight.SemiBold
-            )
-
-            Box(
-                modifier = Modifier
-                    .size(25.dp)
-                    .background(Color.White, shape = CircleShape),
-                contentAlignment = Alignment.Center
-            ) {
-                Icon(
-                    imageVector = Icons.AutoMirrored.Filled.ArrowForward,
-                    contentDescription = null,
-                    tint = Color(0xFFE91E63),
-                    modifier = Modifier.size(20.dp)
-                )
-            }
-        }
-}
-@Composable
-fun HeaderUI2(){
-    val isHaveFreeDelivery = true
-
-
-    Row(
-        modifier = Modifier
-            .clickable {  }
-            .fillMaxWidth()
-            .background(Color(0xFFE8F5E9)) // أخضر فاتح جدًا (خلفية هادئة)
-            .padding(horizontal = 16.dp, vertical = 12.dp),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.SpaceEvenly
-    ) {
-        if (isHaveFreeDelivery)
-            Row {
-                // أيقونة ✅ داخل دائرة بيضاء
+            // 🔴 شارة العدد
+            if (cartCount > 0) {
                 Box(
                     modifier = Modifier
-                        .size(25.dp)
-                        .background(Color.White, shape = CircleShape),
+                        .align(Alignment.TopEnd)
+                        .offset(x = 4.dp, y = (-4).dp)
+                        .size(16.dp)
+                        .background(Color.Red, CircleShape),
                     contentAlignment = Alignment.Center
                 ) {
-                    Icon(
-                        imageVector = Icons.Default.Check,
-                        contentDescription = null,
-                        tint = Color(0xFF4CAF50), // أخضر واضح
-                        modifier = Modifier.size(20.dp)
+                    Text(
+                        text = cartCount.toString(),
+                        color = Color.White,
+                        fontSize = 10.sp,
+                        fontWeight = FontWeight.Bold
                     )
                 }
-
-//                    Spacer(modifier = Modifier.width(12.dp))
-
-                // النص: توصيل مجاني
-                Text(
-                    text = "توصيل مجاني",
-                    color = Color(0xFF2E7D32), // أخضر غامق
-                    fontSize = 12.sp,
-                    fontWeight = FontWeight.SemiBold
-                )
             }
+        }
 
-        GoToCartUI()
+        // 📝 نص عرض السلة
+        Text(
+            text = "عرض السلة",
+            color = Color(0xFF2E7D32),
+            fontSize = 13.sp,
+            fontWeight = FontWeight.SemiBold
+        )
+
+        // ➡️ أيقونة السهم داخل دائرة وردية ناعمة
+        Box(
+            modifier = Modifier
+                .size(28.dp)
+                .background(Color(0xFFFCE4EC), shape = CircleShape),
+            contentAlignment = Alignment.Center
+        ) {
+            Icon(
+                imageVector = Icons.AutoMirrored.Filled.ArrowForward,
+                contentDescription = "Go to cart",
+                tint = Color(0xFFE91E63),
+                modifier = Modifier.size(18.dp)
+            )
+        }
     }
 }
 
 @Composable
+fun HeaderUI2(isHaveFreeDelivery: Boolean) {
+    val viewModel: CartViewModel = hiltViewModel()
+    val context = LocalContext.current
+    val cartCount = viewModel.getCartProducts().size
+    val showHeader = isHaveFreeDelivery || cartCount > 0
+
+    AnimatedVisibility(visible = showHeader) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .background(Color(0xFFE8F5E9)) // أخضر فاتح جدًا
+                .padding(horizontal = 16.dp, vertical = 12.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            // ✅ قسم التوصيل المجاني
+            if (isHaveFreeDelivery) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Box(
+                        modifier = Modifier
+                            .size(28.dp)
+                            .background(Color.White, shape = CircleShape),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Check,
+                            contentDescription = "Free Delivery",
+                            tint = Color(0xFF4CAF50),
+                            modifier = Modifier.size(18.dp)
+                        )
+                    }
+
+                    Spacer(modifier = Modifier.width(8.dp))
+
+                    Text(
+                        text = "توصيل مجاني",
+                        color = Color(0xFF2E7D32),
+                        fontSize = 13.sp,
+                        fontWeight = FontWeight.SemiBold
+                    )
+                }
+            }
+
+            // ✅ زر عرض السلة
+            if (cartCount > 0) {
+                Row(
+                    modifier = Modifier
+                        .clip(RoundedCornerShape(50))
+                        .background(Color.White)
+                        .clickable {
+                            val intent = Intent(
+                                context,
+                                com.owaistelecom.telecom.ui.cart_preview.CartPreviewActivity::class.java
+                            )
+                            context.startActivity(intent)
+                        }
+                        .padding(horizontal = 12.dp, vertical = 8.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    // 🛒 أيقونة السلة مع شارة العدد
+                    Box(
+                        modifier = Modifier.size(28.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .size(28.dp)
+                                .background(Color(0xFFE8F5E9), shape = CircleShape),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.ShoppingCart,
+                                contentDescription = "Cart",
+                                tint = Color(0xFF4CAF50),
+                                modifier = Modifier.size(18.dp)
+                            )
+                        }
+
+                        if (cartCount > 0) {
+                            Box(
+                                modifier = Modifier
+                                    .align(Alignment.TopEnd)
+                                    .offset(x = 4.dp, y = (-4).dp)
+                                    .size(16.dp)
+                                    .background(Color.Red, CircleShape),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Text(
+                                    text = cartCount.toString(),
+                                    color = Color.White,
+                                    fontSize = 10.sp,
+                                    fontWeight = FontWeight.Bold
+                                )
+                            }
+                        }
+                    }
+
+                    Text(
+                        text = "عرض السلة",
+                        color = Color(0xFF2E7D32),
+                        fontSize = 13.sp,
+                        fontWeight = FontWeight.SemiBold
+                    )
+
+                    Box(
+                        modifier = Modifier
+                            .size(28.dp)
+                            .background(Color(0xFFFCE4EC), shape = CircleShape),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.ArrowForward,
+                            contentDescription = "Go to cart",
+                            tint = Color(0xFFE91E63),
+                            modifier = Modifier.size(18.dp)
+                        )
+                    }
+                }
+            }
+        }
+    }
+}
+
+
+
+@Composable
 fun HeaderUI3(context: Context,appSession: AppSession){
-    val isHaveFreeDelivery =
-        appSession.selectedStore.storeCurrencies.any { it.deliveryPrice.toDouble() == 0.0 }
+    val isHaveFreeDelivery = false
+//        appSession.selectedStore.storeCurrencies.any { it.deliveryPrice.toDouble() == 0.0 }
 
     Row(
         modifier = Modifier

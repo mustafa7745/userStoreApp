@@ -92,7 +92,6 @@ class SecureDataStore(private val context: Context) {
         context.secureDataStore.edit { it.clear() }
     }
 }
-
 class StorageDataStore(private val context: Context) {
 
     suspend fun setData(key: String, value: String) {
@@ -109,34 +108,3 @@ class StorageDataStore(private val context: Context) {
             .first()
     }
 }
-
-
-//
-//class SecureStorage(private val inventoryName: String) {
-//
-//    private val context = MyApplication.AppContext
-//
-//    private val masterKeyAlias = MasterKeys.getOrCreate(MasterKeys.AES256_GCM_SPEC)
-//
-//    private val sharedPreferences: SharedPreferences by lazy {
-//        EncryptedSharedPreferences.create(
-//            inventoryName,                    // اسم التخزين
-//            masterKeyAlias,                   // المفتاح الرئيسي
-//            context,                          // السياق
-//            EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
-//            EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
-//        )
-//    }
-//
-//    fun getData(key: String): String {
-//        return sharedPreferences.getString(key, "") ?: ""
-//    }
-//
-//    fun setData(key: String, data: String) {
-//        sharedPreferences.edit().putString(key, data).apply()
-//    }
-//
-//    fun clearData() {
-//        sharedPreferences.edit().clear().apply()
-//    }
-//}

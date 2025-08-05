@@ -4,9 +4,11 @@ import android.content.Context
 import android.content.Intent
 import androidx.activity.ComponentActivity
 import com.owaistelecom.telecom.application.MyApplication
+import com.owaistelecom.telecom.models.PrimaryProduct
+import com.owaistelecom.telecom.models.Product
 import com.owaistelecom.telecom.models.StoreProduct
 import com.owaistelecom.telecom.shared.MyJson
-import com.owaistelecom.telecom.ui.add_to_cart.AddToCartActivity
+import com.owaistelecom.telecom.ui.add_to_cart.AddToCart2Activity
 import com.owaistelecom.telecom.ui.login.LoginActivity
 import com.owaistelecom.telecom.ui.search.SearchActivity
 import com.owaistelecom.telecom.ui.settings.SettingsActivity
@@ -34,10 +36,10 @@ fun gotoSearch(context: Context) {
     context.startActivity(intent)
 }
 
-fun goToAddToCart(context: Context,storeProduct:StoreProduct) {
-    val intent = Intent(context, AddToCartActivity::class.java).apply {
+fun goToAddToCart(context: Context,product:PrimaryProduct) {
+    val intent = Intent(context, AddToCart2Activity::class.java).apply {
 //        flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
     }
-    intent.putExtra("product", MyJson.MyJson.encodeToString(storeProduct))
+    intent.putExtra("product", MyJson.MyJson.encodeToString(product))
     context.startActivity(intent)
 }

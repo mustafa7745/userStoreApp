@@ -40,33 +40,6 @@ class AppInfoMethod @Inject constructor() {
         }
         return PackageInfoCompat.getLongVersionCode(packageInfo).toString()
     }
-    //TOKEN
-    fun getAppToken():String{
-        try {
-            val res =  FirebaseMessaging.getInstance().token.result
-            if (res !=null) {
-                return res
-            }
-            return "e"
-        }
-        catch (e:Exception){
-            return "ex"
-        }
-    }
-    suspend fun getAppToken(onFail:()->Unit, onSuccess:(token:String)->Unit){
-        try {
-            val res =  FirebaseMessaging.getInstance().token.await()
-            if (res !=null) {
-                onSuccess(res)
-            }
-            else{
-                onFail()
-            }
-        }
-        catch (e:Exception){
-            onFail()
-        }
-    }
     ///SHA
     fun getAppSha():String{
         var sha = ""

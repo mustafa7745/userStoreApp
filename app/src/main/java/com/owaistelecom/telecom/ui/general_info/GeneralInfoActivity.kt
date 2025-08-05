@@ -46,12 +46,14 @@ import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Cancel
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.ShoppingCart
 import androidx.compose.material.icons.outlined.ShoppingCart
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardColors
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Divider
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -82,6 +84,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.owaistelecom.telecom.Singlton.AppSession
+import com.owaistelecom.telecom.shared.AppInfoMethod
 import com.owaistelecom.telecom.shared.MainComposeAUD
 import com.owaistelecom.telecom.shared.RequestServer2
 import com.owaistelecom.telecom.shared.ServerConfig
@@ -109,10 +112,14 @@ class GeneralInfoViewModel @Inject constructor(
                 isSetFCM = true
             }
             if (serverConfig.isSetSubscribeApp()){
-                isSetSub= true
+                isSetSub = true
             }
             stateController.successStateAUD()
         }
+    }
+
+    fun getAppVersion(): String {
+      return  AppInfoMethod().getAppVersion()
     }
 }
 
@@ -135,52 +142,68 @@ private fun GeneralInfoScreen() {
     val viewModel:GeneralInfoViewModel = hiltViewModel()
     val activity= LocalContext.current as Activity
     OwaisTelecomTheme {
-        MainComposeAUD ("معلومات التطبيق",viewModel.stateController,{activity.finish()}) {
-            LazyColumn {
+        MainComposeAUD("معلومات التطبيق", viewModel.stateController, { activity.finish() }) {
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(16.dp)
+            ) {
                 item {
-                    Row(
-                        Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
+                    Card(
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(16.dp),
+                        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
                     ) {
-                        Text("Google play Services: (Sub)")
-                        if (viewModel.isSetSub)
-                            Icon(
-                                Icons.Default.CheckCircle,
-                                tint = Color.Green,
-                                contentDescription = ""
+                        Column(modifier = Modifier.padding(16.dp)) {
+                            InfoRow(
+                                label = "Google Play Services: (Sub)",
+                                isOk = viewModel.isSetSub
                             )
-                    }
-                }
-                item {
-                    Row(
-                        Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-
-                        Text("Google play Services: (FCM)")
-                        if (viewModel.isSetFCM)
-                            Icon(
-                                Icons.Default.CheckCircle,
-                                tint = Color.Green,
-                                contentDescription = ""
+                            Divider(modifier = Modifier.padding(vertical = 8.dp))
+                            InfoRow(
+                                label = "Google Play Services: (FCM)",
+                                isOk = viewModel.isSetFCM
                             )
-                    }
-                }
-                item {
-                    Row(
-                        Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-
-                        Text("Version ")
-                        Text(Build.VERSION.RELEASE)
-
+                            HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Text("App Version", style = MaterialTheme.typography.bodyLarge)
+                                Text(viewModel.getAppVersion(), style = MaterialTheme.typography.bodyMedium)
+                            }
+                        }
                     }
                 }
             }
+        }
+
+    }
+
+
+
+}
+@Composable
+fun InfoRow(label: String, isOk: Boolean) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Text(label, style = MaterialTheme.typography.bodyLarge)
+        if (isOk) {
+            Icon(
+                imageVector = Icons.Default.CheckCircle,
+                contentDescription = null,
+                tint = Color(0xFF4CAF50)
+            )
+        } else {
+            Icon(
+                imageVector = Icons.Default.Cancel,
+                contentDescription = null,
+                tint = Color(0xFFF44336)
+            )
         }
     }
 }

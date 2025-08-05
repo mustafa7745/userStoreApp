@@ -8,11 +8,16 @@ import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.ViewModel
 import com.owaistelecom.telecom.Singlton.AppSession
 import com.owaistelecom.telecom.Singlton.FormBuilder
+import com.owaistelecom.telecom.models.Currency
 import com.owaistelecom.telecom.models.CustomPrice
 import com.owaistelecom.telecom.models.Home
+import com.owaistelecom.telecom.models.PrimaryProduct
+import com.owaistelecom.telecom.models.Product
+import com.owaistelecom.telecom.models.ProductOption
 import com.owaistelecom.telecom.models.ProductView
 import com.owaistelecom.telecom.models.StoreCategory
 import com.owaistelecom.telecom.models.StoreNestedSection
+import com.owaistelecom.telecom.models.StoreProduct
 import com.owaistelecom.telecom.models.StoreSection
 import com.owaistelecom.telecom.shared.AToken
 import com.owaistelecom.telecom.shared.CustomException
@@ -28,7 +33,7 @@ import javax.inject.Inject
 @HiltViewModel
 class InsideStoreViewModel @Inject constructor(
     private val requestServer: RequestServer2,
-    private val appSession: AppSession,
+    val appSession: AppSession,
     private val formBuilder: FormBuilder,
     private val remoteConfigRepository: AppSession,
     private val serverConfig: ServerConfig,
@@ -41,25 +46,71 @@ class InsideStoreViewModel @Inject constructor(
 
     var selectedCategory by mutableStateOf<StoreCategory?>(null)
     var selectedSection by mutableStateOf<StoreSection?>(null)
-    var selectedStoreNestedSection by mutableStateOf<StoreNestedSection?>(null)
+
 
     var productViews by mutableStateOf<List<ProductView>>(listOf())
     lateinit var home: Home
 
     val imageBackgroundColors = listOf(
+        // ✨ ألوان فاتحة (ناعمة / باستيل)
         Color(0xFFFFEBEE), // وردي فاتح
         Color(0xFFE3F2FD), // أزرق سماوي
         Color(0xFFF1F8E9), // أخضر فاتح
         Color(0xFFFFF3E0), // برتقالي فاتح
-        Color(0xFFEDE7F6)  // بنفسجي فاتح
+        Color(0xFFEDE7F6), // بنفسجي فاتح
+        Color(0xFFFFFDE7), // أصفر فاتح
+        Color(0xFFE0F7FA), // أزرق مخضر فاتح
+        Color(0xFFF3E5F5), // بنفسجي زهري فاتح
+
+        // 🌈 ألوان زاهية ومبهجة
+        Color(0xFFFFCDD2), // وردي زهري
+        Color(0xFF81D4FA), // أزرق فيروزي
+        Color(0xFF80CBC4), // فيروزي مخضر
+        Color(0xFFFFF176), // أصفر مشرق
+        Color(0xFFFFAB91), // خوخي مشرق
+        Color(0xFFCE93D8), // بنفسجي متوسط
+
+        // 🌑 ألوان داكنة أنيقة
+        Color(0xFFB71C1C), // أحمر غامق
+        Color(0xFF1A237E), // أزرق ملكي داكن
+        Color(0xFF004D40), // أخضر زمردي داكن
+        Color(0xFF4E342E), // بني كاكاوي داكن
+        Color(0xFF263238), // رمادي فحمي أنيق
+        Color(0xFF311B92), // بنفسجي داكن ملكي
+        Color(0xFF37474F), // أزرق رمادي داكن
+
+        // ☁️ محايدة ناعمة
+        Color(0xFFF5F5F5), // رمادي فاتح جداً
+        Color(0xFFE0E0E0), // رمادي ناعم
     )
+
+//    val imageBackgroundColors = listOf(
+//        Color(0xFFFFEBEE), // وردي فاتح
+//        Color(0xFFE3F2FD), // أزرق سماوي
+//        Color(0xFFF1F8E9), // أخضر فاتح
+//        Color(0xFFFFF3E0), // برتقالي فاتح
+//        Color(0xFFEDE7F6), // بنفسجي فاتح
+//
+//        // ألوان إضافية
+//        Color(0xFFFFFDE7), // أصفر فاتح
+//        Color(0xFFE0F7FA), // أزرق مخضر فاتح
+//        Color(0xFFE8F5E9), // أخضر نعناعي فاتح
+//        Color(0xFFFBE9E7), // خوخي وردي فاتح
+//        Color(0xFFF3E5F5), // بنفسجي زهري فاتح
+//        Color(0xFFFFF8E1), // ذهبي كريمي فاتح
+//        Color(0xFFD7CCC8), // رمادي بني فاتح
+//        Color(0xFFE1F5FE), // أزرق ثلجي فاتح
+//        Color(0xFFF9FBE7), // ليموني فاتح
+//        Color(0xFFEFEBE9)  // بيج رملي فاتح
+//    )
+
 
     var isLoadingLinear by mutableStateOf(false)
 
 
-    fun getAppSession(): AppSession {
-        return appSession
-    }
+//    fun appSession(): AppSession {
+//        return appSession
+//    }
 
 
 //    private val _shouldExit = MutableStateFlow(false)
@@ -90,12 +141,181 @@ var shouldExit by mutableStateOf(false)
 
                 selectedCategory = home.storeCategories.first()
                 selectedSection = home.storeSections.first()
-                selectedStoreNestedSection = home.storeNestedSections.first()
+                appSession.selectedStoreNestedSection = home.storeNestedSections.first()
+                appSession.homeProducts += mapOf(appSession.selectedStoreNestedSection!!.id to home.homeProducts)
 //                readProducts()
-                productViews = home.products
+                productViews = processProductViews()
             }
         }
     }
+
+    private fun processProductViews(): List<ProductView> {
+//        val productViews = mutableListOf<ProductView>()
+        val options = home.homeProducts.options
+        val primaryProducts = home.homeProducts.products
+        val productsImages = home.homeProducts.productsImages
+        val storeCurrencies = home.storeCurrencies
+        val storeProducts = home.homeProducts.storeProducts
+
+        home.storeProductViews.forEach { storeProductView ->
+            val products = mutableListOf<StoreProduct>()
+
+            storeProducts
+                .filter { it.storeProductViewId == storeProductView.storeProductViewId }
+                .groupBy { Pair(it.productId, it.storeNestedSectionId) }
+                .forEach { (key, groupedStoreProducts) ->
+                    val (productId, storeNestedSectionId) = key
+                    val primaryProduct = primaryProducts.find { it.id == productId } ?: return@forEach
+                    val imageList = productsImages.filter { it.productId == productId }
+
+                    val productOptions = groupedStoreProducts.filter { it.storeProductViewId == storeProductView.storeProductViewId }.mapNotNull { sp ->
+                        val option = options.find { it.id == sp.optionId } ?: return@mapNotNull null
+                        val currency = storeCurrencies.find { it.currencyId == sp.currencyId } ?: return@mapNotNull null
+
+                        ProductOption(
+                            storeProductId = sp.id,
+                            currency = Currency(currency.currencyId, currency.currencyName),
+                            name = option.name,
+                            price = sp.price.toString()
+                        )
+                    }
+
+                    products += StoreProduct(
+                        product = Product(
+                            productId = primaryProduct.id,
+                            productName = primaryProduct.name,
+                            productDescription = primaryProduct.description,
+                            images = imageList
+                        ),
+                        storeNestedSectionId = storeNestedSectionId,
+                        options = productOptions
+                    )
+                }
+
+            productViews += ProductView(
+                id = storeProductView.productViewId,
+                name = storeProductView.name,
+                products = products
+            )
+        }
+        return productViews
+    }
+
+
+//    private fun processProductViews(): List<ProductView> {
+//        val productViews = mutableListOf<ProductView>()
+//        val options = home.homeProducts.options
+//        val primaryProducts = home.homeProducts.products
+//        val productsImages = home.homeProducts.productsImages
+//        val storeCurrencies = home.storeCurrencies
+//        val storeProducts = home.homeProducts.storeProducts
+//
+//        home.storeProductViews.forEach { storeProductView ->
+//
+//            val products = mutableListOf<StoreProduct>()
+//
+//            var usedProductIds = mutableSetOf<String>()
+//
+//            storeProducts.filter { it.storeProductViewId == storeProductView.storeProductViewId }
+//                .forEach { storeProduct ->
+//                    val productId = storeProduct.productId
+//                    if (usedProductIds.contains(productId.toString())) return@forEach
+//
+//                    val primaryProduct = primaryProducts.find { it.id == productId } ?: return@forEach
+//                    val imageList = productsImages.filter { it.productId == productId }
+//
+//                    val productOptions = storeProducts
+//                        .filter { it.productId == productId }
+//                        .mapNotNull { sp ->
+//                            val option = options.find { it.id == sp.optionId } ?: return@mapNotNull null
+//                            val currency = storeCurrencies.find { it.currencyId == sp.currencyId } ?: return@mapNotNull null
+//
+//                            ProductOption(
+//                                storeProductId = sp.id,
+//                                currency = Currency(currency.currencyId, currency.currencyName),
+//                                name = option.name,
+//                                price = sp.price.toString()
+//                            )
+//                        }
+//
+//                    products += StoreProduct(
+//                        product = Product(
+//                            productId = primaryProduct.id,
+//                            productName = primaryProduct.name,
+//                            productDescription = primaryProduct.description,
+//                            images = imageList
+//                        ),
+//                        storeNestedSectionId = storeProduct.storeNestedSectionId,
+//                        options = productOptions
+//                    )
+//
+//                    usedProductIds.add(productId.toString())
+//                }
+//
+//            productViews += ProductView(
+//                id = storeProductView.productViewId,
+//                name = storeProductView.name,
+//                products = products
+//            )
+//        }
+//
+//        return productViews
+//    }
+
+
+//    private fun processProductViews(): List<ProductView> {
+//        val productViews = mutableListOf<ProductView>()
+//
+//        ///
+////        val storeProducts = home.homeProducts.storeProducts
+//        val options =home.homeProducts.options
+//        val primaryProducts =home.homeProducts.products
+//        val productsImages = home.homeProducts.productsImages
+//        val storeCurrencies = home.storeCategories
+//
+//
+//        home.storeProductViews.forEach { storeProductView ->
+//            var products = mutableListOf<StoreProduct>()
+//            home.homeProducts.storeProducts.forEach { storeProduct ->
+//
+//                products = products.filter { it.product.productId == storeProduct.productId }.toMutableList()
+//                val p = primaryProducts.filter { it.id == storeProduct.productId }
+//                p.forEach {primaryProduct ->
+//                    val options = mutableListOf<ProductOption>()
+//                    home.homeProducts.options.forEach {option->
+//                        home.homeProducts.storeProducts.forEach { storeProduct1 ->
+//                            if (option.id == storeProduct1.optionId){
+//
+//                                val cu = home.storeCurrencies.find { it.currencyId == storeProduct1.currencyId }
+//                                if (cu != null){
+//                                    options += ProductOption(storeProduct1.id,
+//                                        Currency(cu.currencyId,cu.currencyName),option.name,
+//                                        storeProduct1.price.toString()
+//                                    )
+//                                }
+//                            }
+//                        }
+//                    }
+//
+//                    if (storeProductView.storeProductViewId == storeProduct.storeProductViewId){
+//                        products += StoreProduct(
+//                            Product(primaryProduct.id,primaryProduct.name,primaryProduct.description,productsImages.filter { it.productId == primaryProduct.id }),
+//                            storeProduct.storeNestedSectionId,
+//                            options
+//                        )
+//                    }
+//                }
+//
+//            }
+//            productViews +=  ProductView(
+//                    products = products,
+//            id= storeProductView.storeProductViewId,
+//            name =  storeProductView.name
+//            )
+//        }
+//        return  productViews
+//
+//    }
 
     private suspend fun getHome(onSuccess: () -> Unit){
 
@@ -123,23 +343,32 @@ var shouldExit by mutableStateOf(false)
         readHome(onSuccess)
     }
 
- private suspend fun readHome(onSuccess: () -> Unit) {
-        stateController.startRead()
+    fun selectProduct(product: PrimaryProduct){
+        appSession.selectedProduct = product
+    }
 
+ private suspend fun readHome(onSuccess: () -> Unit) {
+//     if (appSession.isHomeLoaded){
+//         stateController.successState()
+//         return
+//     }
+
+        stateController.startRead()
         try {
             val body = formBuilder.loginBuilderForm()
 
-            Log.e("UUURRRL","getLoginConfiguration")
             val data = requestServer.request(body, "getHome")
-            Log.e("UUURRRL2",data.toString())
             val result: Home = MyJson.IgnoreUnknownKeys.decodeFromString(data as String)
             home = result
+            appSession.home = home
+
 
 //            homeStorage.setHome(data,storeId)
             Log.e("dsd", home.toString())
             Log.e("dsd2",result.toString())
             stateController.successState()
             onSuccess()
+            appSession.isHomeLoaded = true
 
         } catch (e: Exception) {
             Log.e("UUURRRL3",e.message.toString())
@@ -178,7 +407,13 @@ var shouldExit by mutableStateOf(false)
             }
             if (!serverConfig.isSetSubscribeApp()){
                 val appId = "101"
-                serverConfig.subscribeToTopicSuspend(appId)
+                val success = serverConfig.subscribeToTopicSuspend(appId)
+                if (success) {
+                    serverConfig.setSubscribeApp(appId)
+                    Log.d("Topic", "Subscribed successfully")
+                } else {
+                    Log.d("Topic", "Subscription failed")
+                }
             }
             else{
                 Log.e("App Sub Stored ","Done")
@@ -199,17 +434,26 @@ var shouldExit by mutableStateOf(false)
     }
 
     suspend fun readProducts(){
+        if (appSession.homeProducts.containsKey(appSession.selectedStoreNestedSection!!.id)) {
+            if (!isLoadingLinear){
+                stateControllerProducts.successState()
+            }else{
+                isLoadingLinear = false
+            }
+            return
+        }
+
         if (!isLoadingLinear)
             stateControllerProducts.startRead()
 //
 
         try {
             val body = formBuilder.sharedBuilderFormWithStoreId()
-                .addFormDataPart("storeNestedSectionId",selectedStoreNestedSection!!.id.toString())
+                .addFormDataPart("storeNestedSectionId",appSession.selectedStoreNestedSection!!.id.toString())
 
             val data = requestServer.request(body, "getProducts")
-            productViews = MyJson.IgnoreUnknownKeys.decodeFromString(data as String)
-            stateController.successState()
+//            appSession.home =  appSession.home.copy(homeProducts =  MyJson.IgnoreUnknownKeys.decodeFromString(data as String))
+            appSession.homeProducts += mapOf(appSession.selectedStoreNestedSection!!.id to MyJson.IgnoreUnknownKeys.decodeFromString(data as String))
             if (!isLoadingLinear){
                 stateControllerProducts.successState()
             }else{

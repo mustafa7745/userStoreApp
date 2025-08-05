@@ -16,8 +16,8 @@ android {
         applicationId = "com.owaistelecom.telecom"
         minSdk = 23
         targetSdk = 35
-        versionCode = 8
-        versionName = "1.3"
+        versionCode = 9
+        versionName = "1.4"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
@@ -105,4 +105,5 @@ dependencies {
     implementation("androidx.security:security-crypto:1.1.0-beta01")
     implementation("androidx.datastore:datastore-preferences:1.1.7")
     implementation("com.google.crypto.tink:tink-android:1.8.0")
+    implementation ("androidx.compose.material:material-icons-extended")
 }

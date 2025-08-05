@@ -18,8 +18,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
-import androidx.core.view.WindowCompat
-import com.owaistelecom.telecom.storage.ThemeStorage
 
 private val DarkColorScheme = darkColorScheme(
     primary = Purple80,
@@ -44,9 +42,6 @@ private val LightColorScheme = lightColorScheme(
     */
 )
 
-var darkTheme by mutableStateOf(ThemeStorage().isDarkMode())
-//var darkTheme by mutableStateOf(ThemeStorage().isDarkMode())
-
 
 @Composable
 fun OwaisTelecomTheme(
@@ -54,16 +49,6 @@ fun OwaisTelecomTheme(
     dynamicColor: Boolean = true,
     content: @Composable () -> Unit
 ) {
-    val colorScheme = when {
-        dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
-            val context = LocalContext.current
-            if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
-        }
-
-        darkTheme -> DarkColorScheme
-        else -> LightColorScheme
-    }
-
     val view = LocalView.current
 //    if (!view.isInEditMode) {
         SideEffect {

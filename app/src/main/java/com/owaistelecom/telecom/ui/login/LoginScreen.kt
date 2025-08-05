@@ -67,9 +67,7 @@ fun LoginScreen(componentActivity: ComponentActivity) {
             val account = task.getResult(ApiException::class.java)
             val idToken = account.idToken
             if (idToken != null) {
-                viewModel.signInWithGoogle(idToken) {
-                    goToDashboard(componentActivity)
-                }
+                viewModel.signInWithGoogle(idToken)
             }
         } catch (e: Exception) {
             viewModel.stateController.errorStateAUD("Google Sign-In Failed: ${e.message}")
@@ -104,9 +102,7 @@ fun LoginScreen(componentActivity: ComponentActivity) {
                 val credential = result.credential.data
                 val idToken = credential.getString("com.google.android.libraries.identity.googleid.BUNDLE_KEY_ID_TOKEN")
                 if (idToken != null) {
-                    viewModel.signInWithGoogle(idToken) {
-                        goToDashboard(componentActivity)
-                    }
+                    viewModel.signInWithGoogle(idToken)
                 }
             } catch (e: GetCredentialException) {
                 viewModel.stateController.errorStateAUD("CredentialManager failed: ${e.message}")

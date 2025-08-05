@@ -4,70 +4,65 @@ import android.util.Log
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.graphics.Color
-import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.google.firebase.ktx.Firebase
-import com.google.firebase.messaging.FirebaseMessaging
-import com.google.firebase.messaging.ktx.messaging
-import com.google.firebase.remoteconfig.ktx.remoteConfig
-import com.google.firebase.remoteconfig.remoteConfigSettings
 import com.owaistelecom.telecom.R
 import com.owaistelecom.telecom.Singlton.AppSession
 import com.owaistelecom.telecom.Singlton.FormBuilder
-import com.owaistelecom.telecom.models.Home
-import com.owaistelecom.telecom.models.OrderAmount
+import com.owaistelecom.telecom.models.Coupon
 import com.owaistelecom.telecom.models.Store
 import com.owaistelecom.telecom.shared.MyJson
 import com.owaistelecom.telecom.shared.RemoteConfigModel
 import com.owaistelecom.telecom.shared.RequestServer2
 import com.owaistelecom.telecom.shared.StateController
-import com.owaistelecom.telecom.shared.getCurrentDate
-import com.owaistelecom.telecom.storage.HomeStorage
-import com.owaistelecom.telecom.ui.add_to_cart.CartProduct
-import com.owaistelecom.telecom.ui.add_to_cart.CartRepository
+import com.owaistelecom.telecom.ui.add_to_cart2.CartProduct2
+import com.owaistelecom.telecom.ui.add_to_cart2.CartRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
-import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.encodeToJsonElement
-import okhttp3.MultipartBody
-import org.json.JSONObject
-import java.time.Duration
 import javax.inject.Inject
 
 @HiltViewModel
 class CartPreviewViewModel @Inject constructor(
     private val requestServer: RequestServer2,
-    private val appSession: AppSession,
+    val appSession: AppSession,
     private val formBuilder: FormBuilder,
-    private val remoteConfigRepository: AppSession,
     private val cartRepository: CartRepository
 ) : ViewModel() {
     var locations by mutableStateOf<List<Location>>(emptyList())
     var paymentsTypes by mutableStateOf<List<PaymentType>>(emptyList())
     val stateController = StateController()
     var selectedLocation by mutableStateOf<Location?>(null)
+    var coupon by mutableStateOf<Coupon?>(null)
 
     var isShowReadLocations by mutableStateOf(false)
     var cartView by mutableStateOf(true)
     var isShowSelectPaymentMethod by mutableStateOf(false)
+    var isShowChooseCouponCode by mutableStateOf(false)
     var isShowShowPaymentTypes by mutableStateOf(false)
     var selectedPaymentMethod by mutableStateOf<PaymentModel?>(null)
 
     var paidCode by mutableStateOf<String>("")
 
 
-    val list = listOf<PaymentModel>(
+    var list = listOf<PaymentModel>(
         PaymentModel("عند الاستلام", R.drawable.ondelivery.toString(), 0),
 //        PaymentModel("من المحفظة", R.drawable.wallet, 2),
-        PaymentModel("دفع الكتروني", R.drawable.epay.toString(), 1)
-    )
 
-    val radioOptions = listOf(
-        DeliveryOption(1,"التوصيل للموقع"),
-        DeliveryOption(2,"الاستلام من المتجر")
     )
+    var radioOptions = listOf(
+    DeliveryOption(2,"الاستلام من المتجر")
+    )
+    init {
+        if (appSession.selectedStore.hasEPayment == 1)
+        list +=  PaymentModel("دفع الكتروني", R.drawable.epay.toString(), 1)
+        if (appSession.selectedStore.hasDelivery == 1)
+            radioOptions +=  DeliveryOption(1,"التوصيل للموقع")
+    }
+
+
+
+
 
 
     var selectedOption by mutableStateOf(radioOptions[0])
@@ -80,14 +75,19 @@ class CartPreviewViewModel @Inject constructor(
        return cartRepository.getAllCartProducts().isEmpty()
     }
     fun getAllCartProductsSum(): String {
-       return cartRepository.getAllCartProductsSum(selectedLocation?.deliveryPrice)
+       return cartRepository.getAllCartProductsSum(null)
     }
-    fun getAllCartProductsSumPrices(): ArrayList<OrderAmount> {
-        return cartRepository.getAllCartProductsSumPrices(selectedLocation?.deliveryPrice)
+    fun getAllCartProductsSumPrices(): String {
+        return cartRepository.getAllCartProductsSum(selectedLocation?.deliveryPrice,coupon)
     }
-    fun getAllCartProducts(): List<CartProduct> {
+    fun getAllCartProducts(): List<CartProduct2> {
         return cartRepository.getAllCartProducts()
     }
+
+    fun emptyCartProducts(storeId:Int) {
+         cartRepository.removeAllProductsFromStore(storeId)
+    }
+
     fun getSelectedStore(): Store {
         return appSession.selectedStore
     }
@@ -172,6 +172,22 @@ class CartPreviewViewModel @Inject constructor(
 
     var shouldExitToOrder by mutableStateOf(false)
 
+
+    fun readCoupon(code:String) {
+        viewModelScope.launch {
+            stateController.startAud()
+            try {
+                val body = formBuilder.sharedBuilderFormWithStoreId().addFormDataPart("code",code)
+                val data = requestServer.request(body, "getCoupon")
+                coupon= MyJson.IgnoreUnknownKeys.decodeFromString(data as String)
+                stateController.successStateAUD()
+                isShowChooseCouponCode = false
+            } catch (e: Exception) {
+                stateController.errorStateAUD(e.message.toString())
+            }
+        }
+    }
+
     suspend fun confirmOrder(onSuccess:()->Unit) {
         Log.e("dsds","ewewe")
         stateController.startAud()
@@ -186,6 +202,9 @@ class CartPreviewViewModel @Inject constructor(
         if (selectedPaymentMethod != null){
             bodyBuilder.addFormDataPart("paid", selectedPaymentMethod!!.id.toString())
             bodyBuilder.addFormDataPart("paidCode", paidCode)
+        }
+        if (coupon != null){
+            bodyBuilder.addFormDataPart("couponCode", coupon!!.code.toString())
         }
 
 

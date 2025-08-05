@@ -1,12 +1,10 @@
 package com.owaistelecom.telecom.shared
 import android.content.Context
-import com.owaistelecom.telecom.storage.GetStorage
 import android.util.Log
 import com.google.firebase.ktx.Firebase
 import com.google.firebase.messaging.FirebaseMessaging
 import com.google.firebase.messaging.ktx.messaging
 import com.owaistelecom.telecom.Singlton.AppSession
-import com.owaistelecom.telecom.storage.SecureDataStore
 import com.owaistelecom.telecom.storage.StorageDataStore
 import com.owaistelecom.telecom.storage.TinkEncryptor
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -19,70 +17,12 @@ import javax.inject.Inject
 import javax.inject.Singleton
 import kotlin.coroutines.resumeWithException
 
-class  ServerConfig5 @Inject constructor() {
-    private val inventory = "config"
-    private val getStorage = GetStorage(inventory);
-    private val remoteConfig = "rc"
-    private val appToken = "appToken"
-    private val subscribeApp = "sa"
-    private val dateKey = "dateKey"
-
-    fun setRemoteConfig(data:String){
-        getStorage.setData(dateKey, getCurrentDate().toString())
-        getStorage.setData(remoteConfig, data)
-    }
-
-    fun getRemoteConfig(): RemoteConfigModel {
-        return MyJson.IgnoreUnknownKeys.decodeFromString(getStorage.getData(remoteConfig))
-    }
-
-//    fun isSetRemoteConfig():Boolean{
-//        return try {
-//            Log.e("ff","sdds")
-//           val data =  getRemoteConfig()
-//                CustomSingleton.remoteConfig = data
-//                return true
-//        }catch (e:Exception){
-//            Log.e("ff","sdds22")
-//            setRemoteConfig("")
-//            false
-//        }
-//    }
-
-    fun setAppToken(data:String){
-        getStorage.setData(appToken, data)
-    }
-
-    fun getAppToken(): String {
-        return getStorage.getData(appToken)
-    }
-
-    fun isSetAppToken():Boolean{
-        return try {
-            return getAppToken().isNotEmpty() && getAppToken() != ""
-        }catch (e:Exception){
-            setAppToken("")
-            false
-        }
-    }
-
-    //
-    private fun getSubscribeApp():String{
-        return getStorage.getData(subscribeApp)
-    }
-    fun setSubscribeApp(data:String){
-        getStorage.setData(subscribeApp, data)
-    }
-    fun isSetSubscribeApp(): Boolean {
-        return getSubscribeApp().isNotEmpty()
-    }
-}
-
 @Singleton
 class  ServerConfig @Inject constructor(
     @ApplicationContext private val context: Context,
-    private val appSession: AppSession
-) {
+    private val appSession: AppSession,
+)
+{
     private val aead by lazy { TinkEncryptor.getAead(context) }
     private val storageDataStore = StorageDataStore(context);
     private val remoteConfigKey = "rc"
@@ -186,8 +126,13 @@ class  ServerConfig @Inject constructor(
     suspend fun subscribeToTopicSuspend(topic: String): Boolean = suspendCancellableCoroutine { cont ->
         Firebase.messaging.subscribeToTopic(topic)
             .addOnCompleteListener { task ->
-                cont.resume(task.isSuccessful, null)
-                Log.e("App Subscribe ","Done")
+                if (task.isSuccessful) {
+                    Log.e("App Subscribe", "Subscribed to $topic")
+                    cont.resume(true, null)
+                } else {
+                    Log.e("App Subscribe", "Subscription failed: ${task.exception?.message}")
+                    cont.resume(false, null)
+                }
             }
     }
 

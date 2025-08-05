@@ -44,7 +44,7 @@ import com.owaistelecom.telecom.shared.MainCompose
 import com.owaistelecom.telecom.shared.MyJson
 import com.owaistelecom.telecom.shared.RequestServer2
 import com.owaistelecom.telecom.shared.StateController
-import com.owaistelecom.telecom.ui.add_to_cart.AddToCartActivity
+import com.owaistelecom.telecom.ui.add_to_cart.AddToCart2Activity
 import com.owaistelecom.telecom.ui.theme.OwaisTelecomTheme
 import dagger.hilt.android.AndroidEntryPoint
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -172,7 +172,7 @@ class SearchActivity : ComponentActivity() {
 private fun goToAddToCart(context: Context,s: StoreProduct) {
     val intent = Intent(
         context,
-        AddToCartActivity::class.java
+        AddToCart2Activity::class.java
     )
     intent.putExtra("product", MyJson.MyJson.encodeToString(s))
     context.startActivity(intent)

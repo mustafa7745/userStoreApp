@@ -154,13 +154,16 @@ class RequestServer2 @Inject constructor(
 
             val request = Request.Builder()
                 .url(finalUrl)
+                .addHeader("Accept", "application/json")
                 .post(body.build())
                 .build()
 
             val response = okHttpClient.newCall(request).execute()
             val data = response.body?.string() ?: throw CustomException(0,"Empty response body")
 
-            Log.e("DATA", data)
+            println("DATA")
+            println( data)
+
             Log.e("CODE", response.code.toString())
 
             when (response.code) {
